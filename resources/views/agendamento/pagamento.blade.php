@@ -1,131 +1,118 @@
 @extends('layouts.app')
 
 @section('conteudo')
+@php
+    $arenaId = request('arena_id');
+    $arena = \App\Models\Arena::with('complexo')->find($arenaId);
+    
+    if (!$arena) {
+        echo "<script>window.location.href = '/agendamento';</script>";
+        exit;
+    }
+    
+    $valorTotal = $arena->preco_hora;
+    $valorTotalFormatado = number_format($valorTotal, 2, ',', '.');
+@endphp
+
 <div class="container-fluid p-0">
     <div class="row justify-content-center">
         <div class="col-md-10">
             
-            <div class="d-flex flex-wrap gap-2 mb-5">
-                <span class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal">✓ Arena</span>
-                <span class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal">✓ Data e Hora</span>
+            <div class="d-flex flex-wrap gap-2 mb-5 mt-3">
+                <a href="/agendamento" class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal text-decoration-none"><i class="bi bi-check2 me-1"></i> 1. Quadra</a>
+                <a href="/agendamento/data?arena_id={{ $arena->id }}" class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal text-decoration-none"><i class="bi bi-check2 me-1"></i> 2. Data e Hora</a>
                 <span class="badge bg-success px-4 py-2 rounded-pill fs-6 fw-normal shadow-sm">3. Pagamento</span>
             </div>
 
             <div class="row">
                 <div class="col-md-8 mb-4 mb-md-0">
-                    <h3 class="mb-4"><strong>Pagamento</strong></h3>
-                    <p class="text-muted">Finalize sua reserva escolhendo a forma de pagamento.</p>
+                    <h3 class="mb-1 fw-bold">Finalizar Reserva</h3>
+                    <p class="text-muted mb-4">Escolha a forma de pagamento para garantir seu horário.</p>
 
-                    <div class="card card-stratos p-4 shadow-sm border-0 mb-4">
-                        <h5 class="mb-3">Forma de pagamento</h5>
-                        <div class="list-group">
-                            <label class="list-group-item p-3 d-flex align-items-center" style="border-radius: 8px 8px 0 0; cursor: pointer;">
-                                <input type="radio" name="pagamento" value="pix" class="me-3" checked onchange="updateButton()">
-                                <div><strong>Pix</strong><br><small class="text-muted">Pagamento instantâneo e seguro.</small></div>
-                            </label>
-                            <label class="list-group-item p-3 d-flex align-items-center" style="border-radius: 0 0 8px 8px; cursor: pointer;">
-                                <input type="radio" name="pagamento" value="local" class="me-3" onchange="updateButton()">
-                                <div><strong>Pagar no Local</strong><br><small class="text-muted">Pague em dinheiro ou cartão ao chegar na arena.</small></div>
-                            </label>
-                        </div>
+                    <div class="card card-stratos p-4 shadow-sm border-0 mb-4 rounded-3">
+                        <h5 class="mb-3 fw-bold">Forma de pagamento</h5>
                         
-                        <button type="button" id="btn-pagar" class="btn btn-verde mt-4 w-100 py-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalConfirmacao">
-                            Pagar R$ 80,00 via Pix
-                        </button>
+                        <form action="/agendamento/finalizar" method="POST">
+                            @csrf
+                            <input type="hidden" name="arena_id" value="{{ $arena->id }}">
+                            <input type="hidden" name="data_reserva" value="{{ date('Y-m-d') }}"> 
+                            <input type="hidden" name="horario" value="18:00"> 
+                            <input type="hidden" name="valor_total" value="{{ $valorTotal }}">
+                            <input type="hidden" name="metodo_pagamento" id="input-metodo" value="pix">
+
+                            <div class="list-group">
+                                <label class="list-group-item p-3 d-flex align-items-center" style="border-radius: 8px 8px 0 0; cursor: pointer;">
+                                    <input type="radio" name="pagamento" value="pix" class="form-check-input me-3 mt-0 fs-5" checked onchange="updateButton()">
+                                    <div>
+                                        <strong class="d-block"><i class="bi bi-lightning-charge-fill text-success me-1"></i> Pix</strong>
+                                        <small class="text-muted">Aprovação instantânea.</small>
+                                    </div>
+                                </label>
+                                
+                                <label class="list-group-item p-3 d-flex align-items-center" style="border-radius: 0 0 8px 8px; cursor: pointer;">
+                                    <input type="radio" name="pagamento" value="local" class="form-check-input me-3 mt-0 fs-5" onchange="updateButton()">
+                                    <div>
+                                        <strong class="d-block"><i class="bi bi-shop me-1"></i> Pagar no Local</strong>
+                                        <small class="text-muted">Pague na recepção do complexo.</small>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <button type="submit" id="btn-pagar" class="btn btn-verde mt-4 w-100 py-3 fw-bold rounded-pill shadow-sm fs-5">
+                                Pagar R$ {{ $valorTotalFormatado }} via Pix
+                            </button>
+                        </form>
                     </div>
                 </div>
 
                 <div class="col-md-4">
-                    <div class="card card-stratos p-4 shadow-sm border-0">
-                        <h5 class="mb-3">Detalhes da Reserva</h5>
-                        <img src="https://images.unsplash.com/photo-1595435934242-4763e0202283?q=80&w=400" class="img-fluid rounded mb-3" alt="Imagem da Arena">
-                        <p class="mb-1"><strong>Arena Sol Nascente</strong></p>
-                        <p class="text-muted small">Beach Tênis | Recife, PE</p>
-                        <hr>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Data</span>
-                            <span class="fw-bold">05/07/2026</span>
+                    <div class="card card-stratos p-4 shadow-sm border-0 rounded-3">
+                        <h5 class="mb-3 fw-bold">Resumo da Reserva</h5>
+                        <div class="bg-light rounded mb-3 d-flex align-items-center justify-content-center text-muted" style="height: 150px;">
+                            <i class="bi bi-image opacity-50 display-4"></i>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Horário</span>
-                            <span class="fw-bold">18:00</span>
+                        <p class="mb-1 fw-bold fs-5">{{ $arena->nome }}</p>
+                        <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-success me-1"></i> {{ $arena->complexo->nome ?? 'Complexo Stratos' }}</p>
+                        <hr class="text-muted">
+                        <div class="d-flex justify-content-between mb-2"><span class="text-muted">Data</span><span class="fw-semibold text-dark">Hoje</span></div>
+                        <div class="d-flex justify-content-between mb-2"><span class="text-muted">Horário</span><span class="fw-semibold text-dark">18:00</span></div>
+                        <div class="d-flex justify-content-between mb-2"><span class="text-muted">Modalidade</span><span class="fw-semibold text-dark">{{ $arena->tipo_esporte }}</span></div>
+                        <hr class="text-muted">
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <span class="text-muted fw-bold">Total</span>
+                            <h4 class="text-success fw-bold mb-0">R$ {{ $valorTotalFormatado }}</h4>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <span class="text-muted">Valor da reserva</span>
-                            <span class="fw-bold">R$ 80,00</span>
-                        </div>
-                        <h4 class="text-success mt-4 fw-bold">Total: R$ 80,00</h4>
-                        <div id="msg-garantia" class="alert alert-success small mt-3 mb-0 border-0 bg-success bg-opacity-10 text-success">
-                            Reserva garantida após confirmação do Pix.
+                        <div id="msg-garantia" class="alert alert-success small mt-4 mb-0 border-0 bg-success bg-opacity-10 text-success fw-semibold">
+                            <i class="bi bi-shield-check me-1"></i> Reserva garantida após o Pix.
                         </div>
                     </div>
                 </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modalConfirmacao" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalConfirmacaoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="modal-body p-5 text-center">
-                
-                <div class="mb-4">
-                    <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle" style="width: 80px; height: 80px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
-                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
-                        </svg>
-                    </div>
-                </div>
-                
-                <h3 class="fw-bold text-success mb-2">Reserva Confirmada!</h3>
-                <p class="text-muted mb-4">Seu pagamento foi processado e o horário já está garantido.</p>
-
-                <div class="bg-light rounded p-3 text-start mb-4 text-sm border">
-                    <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                        <span class="text-muted">Local:</span>
-                        <span class="fw-bold">Arena Sol Nascente</span>
-                    </div>
-                    <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                        <span class="text-muted">Data/Hora:</span>
-                        <span class="fw-bold">05/07/2026 às 18:00</span>
-                    </div>
-                    <div class="d-flex justify-content-between pt-1">
-                        <span class="text-muted">Total:</span>
-                        <span class="fw-bold text-success">R$ 80,00</span>
-                    </div>
-                </div>
-
-                <div class="d-flex flex-column gap-2 mt-4">
-                    <a href="/cliente/agendamentos" class="btn btn-verde w-100 py-3 fw-bold rounded-pill">
-                        Ver Minhas Reservas
-                    </a>
-                    <a href="/" class="btn btn-outline-success w-100 py-3 fw-bold rounded-pill">
-                        Criar Nova Reserva
-                    </a>
-                    <a href="/" class="btn btn-light text-muted w-100 py-3 fw-bold rounded-pill border">
-                        Voltar à Página Inicial
-                    </a>
-                </div>
-                
             </div>
         </div>
     </div>
 </div>
 
 <script>
+    const valorReal = "{{ $valorTotalFormatado }}";
+
     function updateButton() {
         const btn = document.getElementById('btn-pagar');
         const msg = document.getElementById('msg-garantia');
+        const inputMetodo = document.getElementById('input-metodo');
         const isPix = document.querySelector('input[name="pagamento"]:checked').value === 'pix';
         
+        inputMetodo.value = isPix ? 'pix' : 'local';
+
         if (isPix) {
-            btn.textContent = 'Pagar R$ 80,00 via Pix';
-            msg.textContent = 'Reserva garantida após confirmação do Pix.';
+            btn.innerHTML = `Pagar R$ ${valorReal} via Pix`;
+            btn.className = "btn btn-verde mt-4 w-100 py-3 fw-bold rounded-pill shadow-sm fs-5";
+            msg.innerHTML = '<i class="bi bi-shield-check me-1"></i> Reserva garantida após o Pix.';
+            msg.className = "alert alert-success small mt-4 mb-0 border-0 bg-success bg-opacity-10 text-success fw-semibold";
         } else {
-            btn.textContent = 'Confirmar Reserva';
-            msg.textContent = 'Reserva confirmada. O pagamento será realizado na recepção da arena.';
+            btn.innerHTML = 'Confirmar Reserva (Pagar no Local)';
+            btn.className = "btn btn-dark mt-4 w-100 py-3 fw-bold rounded-pill shadow-sm fs-5";
+            msg.innerHTML = '<i class="bi bi-info-circle me-1"></i> O pagamento será realizado na recepção.';
+            msg.className = "alert alert-secondary small mt-4 mb-0 border-0 bg-secondary bg-opacity-10 text-secondary fw-semibold";
         }
     }
 </script>

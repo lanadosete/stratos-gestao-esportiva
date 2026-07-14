@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            
+            // O NOSSO CAMPO DE PERMISSÃO:
+            $table->string('tipo_conta')->default('cliente'); 
+            
             $table->rememberToken();
             $table->timestamps();
         });
