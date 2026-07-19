@@ -1,95 +1,129 @@
 @extends('layouts.app')
 
 @section('conteudo')
-<div class="container-fluid p-0">
-    <div class="row g-0">
-        <!-- Sidebar Admin -->
-        <div class="col-md-2 p-4 sidebar-stratos border-end" style="min-height: 90vh;">
-            <div class="mb-5 text-center text-md-start">
-                <img src="{{ asset('img/logo-stratos.svg') }}" alt="Logo Stratos" style="max-width: 80px; height: auto;">
+<div class="container py-5">
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h3 class="fw-bold mb-0">Painel Financeiro</h3>
+            <p class="text-muted mb-0">Visão geral do faturamento das suas quadras em <strong class="text-capitalize">{{ $nomeMes }}</strong>.</p>
+        </div>
+    </div>
+
+    <!-- 4 Cartões de Indicadores (Faturamento, Pix, Recebido Local, Pendente Local) -->
+    <div class="row g-4 mb-5">
+        
+        <!-- 1. Faturamento Total -->
+        <div class="col-md-3">
+            <div class="card card-stratos border-0 shadow-sm p-4 h-100 rounded-4 bg-dark text-white">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h6 class="fw-semibold mb-0 text-white-50">Faturamento Total</h6>
+                    <div class="bg-white bg-opacity-25 rounded p-2">
+                        <i class="bi bi-wallet2 text-white"></i>
+                    </div>
+                </div>
+                <h2 class="fw-bold mb-0">R$ {{ number_format($faturamentoTotal, 2, ',', '.') }}</h2>
             </div>
-            <ul class="nav flex-column">
-                <li class="nav-item mb-3"><a href="/admin/dashboard" class="nav-link text-muted">Dashboard</a></li>
-                <li class="nav-item mb-3"><a href="/admin/arenas" class="nav-link text-muted">Arenas (Quadras)</a></li>
-                <li class="nav-item mb-3"><a href="/admin/financeiro" class="nav-link text-dark fw-bold">Financeiro</a></li>
-                <li class="nav-item mb-3"><a href="/admin/equipe" class="nav-link text-muted">Equipe</a></li>
-            </ul>
         </div>
 
-        <!-- Conteúdo Principal -->
-        <div class="col-md-10 p-5 bg-gradient-stratos">
-            
-            <h3 class="fw-bold mb-1">Painel Financeiro</h3>
-            <p class="text-muted mb-4">Acompanhe as receitas das suas quadras neste mês.</p>
-            
-            <div class="row mb-4 g-4">
-                <div class="col-md-4">
-                    <div class="card card-stratos p-4 border-0 shadow-sm h-100 border-bottom border-success border-3">
-                        <div class="d-flex justify-content-between">
-                            <small class="text-muted text-uppercase fw-bold">Faturamento (Mês)</small>
-                            <i class="bi bi-graph-up-arrow text-success"></i>
-                        </div>
-                        <h3 class="mt-2 fw-bold text-dark">R$ 12.450,00</h3>
-                        <small class="text-success"><i class="bi bi-arrow-up-short"></i> +15% vs mês passado</small>
+        <!-- 2. Garantido no Pix -->
+        <div class="col-md-3">
+            <div class="card card-stratos border-0 shadow-sm p-4 h-100 rounded-4 border-start border-success border-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h6 class="fw-semibold mb-0 text-muted">Garantido no Pix</h6>
+                    <div class="bg-success bg-opacity-10 rounded p-2">
+                        <i class="bi bi-lightning-charge-fill text-success"></i>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card card-stratos p-4 border-0 shadow-sm h-100">
-                        <div class="d-flex justify-content-between">
-                            <small class="text-muted text-uppercase fw-bold">Recebido via Pix</small>
-                            <i class="bi bi-phone text-muted"></i>
-                        </div>
-                        <h3 class="mt-2 fw-bold text-dark">R$ 8.200,00</h3>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card card-stratos p-4 border-0 shadow-sm h-100">
-                        <div class="d-flex justify-content-between">
-                            <small class="text-muted text-uppercase fw-bold">A Receber (No Local)</small>
-                            <i class="bi bi-cash-coin text-muted"></i>
-                        </div>
-                        <h3 class="text-warning mt-2 fw-bold">R$ 4.250,00</h3>
-                    </div>
-                </div>
+                <h2 class="fw-bold text-success mb-0">R$ {{ number_format($recebidoPix, 2, ',', '.') }}</h2>
+                <small class="text-muted mt-2 d-block">Já está na sua conta</small>
             </div>
+        </div>
 
-            <div class="card card-stratos p-4 border-0 shadow-sm">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0 fw-bold">Últimas Transações (Exemplo)</h5>
-                    <button class="btn btn-sm btn-outline-success rounded-pill"><i class="bi bi-download me-1"></i> Exportar</button>
+        <!-- 3. Recebido no Balcão (NOVO) -->
+        <div class="col-md-3">
+            <div class="card card-stratos border-0 shadow-sm p-4 h-100 rounded-4 border-start border-primary border-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h6 class="fw-semibold mb-0 text-muted">Recebido no Local</h6>
+                    <div class="bg-primary bg-opacity-10 rounded p-2">
+                        <i class="bi bi-cash-stack text-primary"></i>
+                    </div>
                 </div>
-                
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mt-2">
-                        <thead class="text-muted small text-uppercase">
-                            <tr>
-                                <th>Data</th>
-                                <th>Quadra</th>
-                                <th>Cliente</th>
-                                <th>Forma de Pagto</th>
-                                <th class="text-end">Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Hoje, 18:00</td>
-                                <td>Quadra 1 - Areia</td>
-                                <td>Lucas A.</td>
-                                <td><span class="badge bg-success bg-opacity-10 text-success border-0"><i class="bi bi-lightning-charge-fill me-1"></i> Pix</span></td>
-                                <td class="text-end fw-bold text-dark">R$ 120,00</td>
-                            </tr>
-                            <tr>
-                                <td>Hoje, 19:00</td>
-                                <td>Quadra 2 - Society</td>
-                                <td>Mariana S.</td>
-                                <td><span class="badge bg-secondary bg-opacity-10 text-secondary border-0"><i class="bi bi-wallet2 me-1"></i> No Local</span></td>
-                                <td class="text-end fw-bold text-dark">R$ 150,00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <h2 class="fw-bold text-primary mb-0">R$ {{ number_format($recebidoLocal, 2, ',', '.') }}</h2>
+                <small class="text-muted mt-2 d-block">Entrou no caixa hoje</small>
             </div>
-            
+        </div>
+
+        <!-- 4. A Receber no Local -->
+        <div class="col-md-3">
+            <div class="card card-stratos border-0 shadow-sm p-4 h-100 rounded-4 border-start border-warning border-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h6 class="fw-semibold mb-0 text-muted">A Receber no Local</h6>
+                    <div class="bg-warning bg-opacity-10 rounded p-2">
+                        <i class="bi bi-shop text-warning"></i>
+                    </div>
+                </div>
+                <h2 class="fw-bold text-warning mb-0">R$ {{ number_format($pendenteLocal, 2, ',', '.') }}</h2>
+                <small class="text-muted mt-2 d-block">Cobrar na recepção</small>
+            </div>
+        </div>
+        
+    </div>
+
+    <h5 class="fw-bold mb-3">Histórico de Reservas</h5>
+    <div class="card card-stratos p-0 border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table align-middle table-hover mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3">Data e Hora</th>
+                        <th class="py-3">Quadra</th>
+                        <th class="py-3">Valor</th>
+                        <th class="py-3">Pagamento</th>
+                        <th class="py-3 pe-4">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($reservasMes as $reserva)
+                        <tr>
+                            <td class="ps-4">
+                                <span class="fw-semibold d-block">{{ \Carbon\Carbon::parse($reserva->data_reserva)->format('d/m/Y') }}</span>
+                                <small class="text-muted">{{ $reserva->horario }}</small>
+                            </td>
+                            <td>
+                                <span class="fw-semibold">{{ $reserva->arena->nome ?? 'Quadra Removida' }}</span>
+                            </td>
+                            <td class="fw-bold text-dark">
+                                R$ {{ number_format($reserva->valor_total, 2, ',', '.') }}
+                            </td>
+                            <td>
+                                @if($reserva->metodo_pagamento === 'pix')
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
+                                        <i class="bi bi-lightning-charge-fill me-1"></i> Pix
+                                    </span>
+                                @else
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1">
+                                        <i class="bi bi-shop me-1"></i> Local
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="pe-4">
+                                @if($reserva->status === 'finalizado')
+                                    <span class="badge bg-primary rounded-pill px-3">Finalizado</span>
+                                @else
+                                    <span class="badge bg-secondary rounded-pill px-3">{{ ucfirst($reserva->status) }}</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox display-4 d-block mb-3 opacity-50"></i>
+                                Nenhuma reserva realizada ainda neste mês.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

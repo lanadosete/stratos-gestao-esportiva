@@ -2,18 +2,15 @@
 
 @section('conteudo')
 @php
-    // Captura qual quadra o cliente clicou no Passo 1
     $arenaId = request('arena_id');
     $arena = \App\Models\Arena::find($arenaId);
     
-    // Se por acaso alguém tentar acessar essa página direto pela URL sem escolher quadra, manda de volta
     if (!$arena) {
         echo "<script>window.location.href = '/agendamento';</script>";
         exit;
     }
 @endphp
 
-<!-- CSS do Flatpickr Oficial -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
 <style>
     .flatpickr-day.selected { background: #28a745 !important; border-color: #28a745 !important; }
@@ -23,7 +20,6 @@
     <div class="row justify-content-center">
         <div class="col-md-10">
             
-            <!-- Barra de Progresso -->
             <div class="d-flex flex-wrap gap-2 mb-5 mt-3">
                 <a href="/agendamento" class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal text-decoration-none"><i class="bi bi-check2 me-1"></i> 1. Quadra</a>
                 <span class="badge bg-success px-4 py-2 rounded-pill fs-6 fw-normal shadow-sm">2. Data e Hora</span>
@@ -35,7 +31,6 @@
                 <p class="text-muted">Selecione a data e o horário para jogar na <strong class="text-success">{{ $arena->nome }}</strong>.</p>
             </div>
 
-            <!-- Resumo da Modalidade (Gerado dinamicamente com os dados do banco) -->
             <div class="card bg-light p-4 shadow-sm border-0 mb-4 rounded-3 d-flex flex-row align-items-center justify-content-between">
                 <div>
                     <span class="badge bg-success text-white mb-2 px-3 py-2 fw-semibold"><i class="bi bi-trophy me-1"></i> {{ $arena->tipo_esporte }}</span>
@@ -47,7 +42,6 @@
             </div>
 
             <div class="row">
-                <!-- Coluna do Calendário -->
                 <div class="col-md-5 mb-4 mb-md-0">
                     <div class="card card-stratos p-4 shadow-sm border-0 h-100">
                         <h5 class="mb-4 fw-bold">1. Escolha o dia</h5>
@@ -57,12 +51,10 @@
                     </div>
                 </div>
 
-                <!-- Coluna dos Horários -->
                 <div class="col-md-7">
                     <div class="card card-stratos p-4 shadow-sm border-0">
                         <h5 class="mb-4 fw-bold">2. Escolha os horários</h5>
                         
-                        <!-- Simulador de horários (No futuro buscaremos do banco também) -->
                         <div class="d-flex flex-wrap gap-2 mb-4">
                             <input type="checkbox" class="btn-check horario-checkbox" name="horarios[]" value="18:00" id="h18" autocomplete="off" onchange="atualizarResumo()">
                             <label class="btn btn-outline-success rounded p-3 text-center fw-semibold" style="min-width: 100px;" for="h18">18:00</label>
@@ -77,7 +69,6 @@
                             <label class="btn btn-outline-success rounded p-3 text-center fw-semibold" style="min-width: 100px;" for="h21">21:00</label>
                         </div>
 
-                        <!-- Resumo Financeiro Dinâmico -->
                         <div class="bg-success bg-opacity-10 rounded p-4 mb-4 d-none" id="box-resumo">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
@@ -102,20 +93,23 @@
     </div>
 </div>
 
-<!-- Scripts Flatpickr Oficiais -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/pt.js"></script>
 
 <script>
-    // Inicialização do Calendário
+    // 1. Mudamos o formato da data para 'Y-m-d' (padrão de banco de dados) 
+    // e criamos o evento onChange para sempre que trocar o dia, atualizar o botão.
     flatpickr("#data-reserva", {
         locale: "pt",
         minDate: "today",
-        dateFormat: "d/m/Y",
-        inline: true
+        defaultDate: "today",
+        dateFormat: "Y-m-d", 
+        inline: true,
+        onChange: function(selectedDates, dateStr, instance) {
+            atualizarResumo();
+        }
     });
 
-    // Lógica para calcular o preço em tempo real
     function atualizarResumo() {
         const checkboxes = document.querySelectorAll('.horario-checkbox:checked');
         const boxResumo = document.getElementById('box-resumo');
@@ -123,7 +117,8 @@
         const textoTotal = document.getElementById('texto-total');
         const btnAvancar = document.getElementById('btn-avancar');
         
-        // Puxa o valor da hora direto do backend (PHP)
+        // Captura a data exata do calendário
+        const dataSelecionada = document.getElementById('data-reserva').value;
         const valorHora = {{ $arena->preco_hora }}; 
         
         let horariosSelecionados = [];
@@ -133,14 +128,21 @@
             boxResumo.classList.remove('d-none');
             btnAvancar.classList.remove('disabled');
             
-            textoHorarios.textContent = horariosSelecionados.join(' | ');
+            // Se ele escolher mais de um, junta com "|" (ex: 18:00 | 19:00)
+            const horariosStr = horariosSelecionados.join(' | ');
+            textoHorarios.textContent = horariosStr;
             
-            // Multiplica o valor da hora pela quantidade de "caixinhas" marcadas
             const total = horariosSelecionados.length * valorHora;
             textoTotal.textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+
+            // 2. A MÁGICA ACONTECE AQUI:
+            // Atualiza o link do botão injetando a data e a hora dinamicamente na URL
+            const urlBase = "/agendamento/pagamento?arena_id={{ $arena->id }}";
+            btnAvancar.href = `${urlBase}&data=${dataSelecionada}&horario=${encodeURIComponent(horariosStr)}`;
         } else {
             boxResumo.classList.add('d-none');
             btnAvancar.classList.add('disabled');
+            btnAvancar.href = "#"; // Remove o link se nenhum horário estiver marcado
         }
     }
 </script>

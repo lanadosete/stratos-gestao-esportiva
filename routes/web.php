@@ -1,49 +1,71 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ArenaController;
-use App\Http\Controllers\ComplexoController;
-use App\Models\Complexo;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\{
+    AdminConfiguracaoController,
+    AuthController,
+    ArenaController,
+    ComplexoConfiguracaoController,
+    ComplexoController,
+    EquipeController,
+    FinanceiroController,
+    ReservaController,
+    GradeHorarioController
+};
+use App\Models\{Complexo, Reserva};
+use Carbon\Carbon;
 
 // ==========================================
-// 1. ROTAS PÚBLICAS (Apenas para Visitantes)
+// ROTA PÚBLICA (Landing Page)
+// ==========================================
+Route::get('/', function () { return view('home'); });
+
+// ==========================================
+// ROTA DE GUEST (Login/Cadastro)
 // ==========================================
 Route::middleware('guest')->group(function () {
-    Route::get('/', function () { return view('home'); });
     Route::get('/cadastro', function () { return view('auth.register'); });
     Route::get('/login', function () { return view('auth.login'); })->name('login');
-
     Route::post('/cadastro', [AuthController::class, 'registrar']);
     Route::post('/login', [AuthController::class, 'entrar']);
 });
 
 // ==========================================
-// 2. ROTAS PROTEGIDAS (Exigem Login)
+// ROTAS PROTEGIDAS (Auth)
 // ==========================================
 Route::middleware('auth')->group(function () {
 
-    // Rota de Logout
     Route::post('/logout', [AuthController::class, 'sair']);
 
-    // ==========================================
-    // A. FLUXO DE AGENDAMENTO (Acesso Geral)
-    // ==========================================
+    // 1. FLUXO DE AGENDAMENTO
     Route::prefix('agendamento')->group(function () {
         Route::get('/', function () { return view('agendamento.arenas'); });
-        Route::get('/data', function () { return view('agendamento.data'); });
+        
+        // Rota atualizada para buscar os dados da arena e configurar a grade na view
+        Route::get('/data', function () {
+            $arena = \App\Models\Arena::findOrFail(request('arena_id'));
+            return view('agendamento.data', compact('arena'));
+        });
+
         Route::get('/pagamento', function () { return view('agendamento.pagamento'); });
+
         Route::post('/finalizar', [ReservaController::class, 'salvar']);
+        Route::get('/{id}/sucesso', [ReservaController::class, 'sucesso']);
     });
 
-    // ==========================================
-    // B. PAINEL DO CLIENTE (Apenas Jogadores)
-    // ==========================================
+    Route::post('/reservas/{id}/cancelar', [ReservaController::class, 'cancelar']);
+
+    // 2. PAINEL DO CLIENTE
     Route::prefix('cliente')->group(function () {
         Route::get('/agendamentos', function () { 
             if (Auth::user()->tipo_conta !== 'cliente') return redirect('/');
-            return view('cliente.agendamentos'); 
+            $reservas = Reserva::with('arena.complexo')
+                ->where('user_id', Auth::id())
+                ->orderBy('data_reserva', 'desc')
+                ->orderBy('horario', 'desc')
+                ->get();
+            return view('cliente.agendamentos', compact('reservas')); 
         });
         
         Route::get('/perfil', function () { 
@@ -52,67 +74,77 @@ Route::middleware('auth')->group(function () {
         }); 
     });
 
-    // ==========================================
-    // C. PAINEL DA RECEPÇÃO (Funcionários e Admins)
-    // ==========================================
+    // 3. PAINEL DA RECEPÇÃO
     Route::prefix('recepcao')->group(function () {
         Route::get('/', function () { 
-            if (!in_array(Auth::user()->tipo_conta, ['admin', 'funcionario'])) {
-                return redirect('/');
-            }
-            return view('recepcao.painel'); 
+            if (!in_array(Auth::user()->tipo_conta, ['admin', 'funcionario'])) return redirect('/');
+            
+            $jogosHoje = Reserva::with(['arena', 'user'])
+                ->whereDate('data_reserva', Carbon::today())
+                ->where('status', '!=', 'cancelado')
+                ->orderBy('horario', 'asc')
+                ->get();
+
+            return view('recepcao.painel', compact('jogosHoje')); 
+        });
+
+        Route::post('/reservas/{id}/finalizar', function($id) {
+            Reserva::findOrFail($id)->update(['status' => 'finalizado']);
+            return back()->with('success', 'Pagamento confirmado e jogo liberado!');
         });
     });
 
-    // ==========================================
-    // D. PAINEL DO ADMINISTRADOR (Dono do Espaço)
-    // ==========================================
+    // 4. PAINEL DO ADMINISTRADOR
     Route::prefix('admin')->group(function () {
         
         Route::get('/', function () { return redirect('/admin/dashboard'); });
         
-        // Dashboard com lógica de Onboarding
         Route::get('/dashboard', function () { 
             if (Auth::user()->tipo_conta !== 'admin') return redirect('/');
-            
             $complexo = Complexo::where('user_id', Auth::id())->first();
-            
-            if (!$complexo) {
-                return redirect('/admin/complexo/nova');
-            }
+            if (!$complexo) return redirect('/admin/complexo/nova');
             
             $arenas = $complexo->arenas;
-            return view('admin.dashboard', compact('complexo', 'arenas')); 
+            $totalReservas = Reserva::whereIn('arena_id', $arenas->pluck('id'))
+                ->where('status', '!=', 'cancelado')
+                ->count();
+            
+            return view('admin.dashboard', compact('complexo', 'arenas', 'totalReservas')); 
         });
 
-        // Gestão do Complexo
-        Route::get('/complexo/nova', function () {
-            if (Auth::user()->tipo_conta !== 'admin') return redirect('/');
-            return view('admin.complexo.nova');
-        });
+        // Complexo
+        Route::get('/complexo/nova', function () { return view('admin.complexo.nova'); });
+        Route::get('/complexo/{id}/editar', [ComplexoController::class, 'editar']);
         Route::post('/complexo/salvar', [ComplexoController::class, 'salvar']);
+        Route::post('/complexo/{id}/atualizar', [ComplexoController::class, 'atualizar']);
+        Route::post('/complexo/{complexoId}/funcionamento', [ComplexoConfiguracaoController::class, 'salvarFuncionamento']);
 
-        // Gestão das Arenas
-        Route::get('/arenas/nova', function () {
-            if (Auth::user()->tipo_conta !== 'admin') return redirect('/');
-            return view('admin.arenas.nova');
-        });
-        Route::post('/arenas/salvar', [ArenaController::class, 'salvar']);
-
+        // Gestão de Arenas
         Route::get('/arenas', function () { 
-            if (Auth::user()->tipo_conta !== 'admin') return redirect('/');
-            return view('admin.arenas'); 
+            $complexo = Complexo::where('user_id', Auth::id())->first();
+            $arenas = $complexo ? $complexo->arenas : [];
+            return view('admin.arenas', compact('arenas')); 
         });
+        Route::get('/arenas/nova', function () { return view('admin.arenas.nova'); });
+        Route::post('/arenas/salvar', [ArenaController::class, 'salvar']);
+        Route::get('/arenas/{id}/editar', [ArenaController::class, 'editar']);
+        Route::post('/arenas/{id}/atualizar', [ArenaController::class, 'atualizar']);
+        Route::post('/arenas/{id}/excluir', [ArenaController::class, 'excluir']);
+
+        // Grade de Horários (Configuração de Preços Dinâmicos)
+        Route::get('/arena/{id}/grade', [GradeHorarioController::class, 'configurar']);
+        Route::post('/arena/grade/salvar', [GradeHorarioController::class, 'salvar']);
+        Route::delete('/arena/grade/excluir/{id}', [GradeHorarioController::class, 'excluir']);
+
+        // Nova configuração de funcionamento, esportes e preços por turno
+        Route::get('/arena/{arenaId}/configuracoes', [AdminConfiguracaoController::class, 'configuracoes']);
+        Route::post('/arena/{arenaId}/configuracoes/funcionamento', [AdminConfiguracaoController::class, 'salvarFuncionamento']);
+        Route::post('/arena/{arenaId}/configuracoes/esporte', [AdminConfiguracaoController::class, 'salvarEsporte']);
+        Route::post('/arena/{arenaId}/configuracoes/preco', [AdminConfiguracaoController::class, 'salvarPreco']);
         
-        // Módulos Administrativos
-        Route::get('/financeiro', function () { 
-            if (Auth::user()->tipo_conta !== 'admin') return redirect('/');
-            return view('admin.financeiro'); 
-        });
-        
-        Route::get('/equipe', function () { 
-            if (Auth::user()->tipo_conta !== 'admin') return redirect('/');
-            return view('admin.equipe'); 
-        });
+        // Financeiro e Equipe
+        Route::get('/financeiro', [FinanceiroController::class, 'index']);
+        Route::get('/equipe', function () { return view('admin.equipe'); });
+        Route::post('/equipe/salvar', [EquipeController::class, 'salvar']);
     });
 });

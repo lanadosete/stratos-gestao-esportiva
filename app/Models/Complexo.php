@@ -16,4 +16,9 @@ class Complexo extends Model
     {
         return $this->hasMany(Arena::class);
     }
+
+    public function funcionamento()
+    {
+        return $this->hasMany(ComplexoFuncionamento::class);
+    }
 }

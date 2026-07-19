@@ -1,8 +1,23 @@
 @extends('layouts.app')
 
 @section('conteudo')
+@php
+    // O Laravel faz os cálculos matemáticos para preencher os seus cartões do topo!
+    $totalReservas = $jogosHoje->count();
+    $pagamentosPendentes = $jogosHoje->where('status', 'confirmado')->where('metodo_pagamento', 'local')->count();
+    $checkinsRealizados = $jogosHoje->where('status', 'finalizado')->count();
+@endphp
+
 <div class="container py-5">
     
+    <!-- Alerta de Sucesso ao dar Baixa -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 rounded-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <!-- Cabeçalho da Recepção -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
         <div>
@@ -21,14 +36,14 @@
         </div>
     </div>
 
-    <!-- Indicadores Rápidos -->
+    <!-- Indicadores Rápidos (Agora com Matemática Dinâmica) -->
     <div class="row mb-4 g-3">
         <div class="col-md-4">
             <div class="card card-stratos p-3 border-0 shadow-sm border-start border-success border-4 h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <small class="text-muted text-uppercase fw-bold">Total de Reservas (Hoje)</small>
-                        <h3 class="mb-0 fw-bold text-dark mt-1">12</h3>
+                        <h3 class="mb-0 fw-bold text-dark mt-1">{{ $totalReservas }}</h3>
                     </div>
                     <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
                         <i class="bi bi-calendar-check fs-4 text-success"></i>
@@ -41,7 +56,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <small class="text-muted text-uppercase fw-bold">Pagamentos Pendentes</small>
-                        <h3 class="mb-0 fw-bold text-dark mt-1">4</h3>
+                        <h3 class="mb-0 fw-bold text-dark mt-1">{{ $pagamentosPendentes }}</h3>
                     </div>
                     <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
                         <i class="bi bi-cash-coin fs-4 text-warning"></i>
@@ -54,7 +69,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <small class="text-muted text-uppercase fw-bold">Check-ins Realizados</small>
-                        <h3 class="mb-0 fw-bold text-dark mt-1">5</h3>
+                        <h3 class="mb-0 fw-bold text-dark mt-1">{{ $checkinsRealizados }}</h3>
                     </div>
                     <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
                         <i class="bi bi-person-check fs-4 text-primary"></i>
@@ -69,10 +84,6 @@
         
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="fw-bold mb-0">Agenda do Dia</h5>
-            <div class="input-group shadow-sm rounded-3" style="max-width: 300px;">
-                <span class="input-group-text border-0 bg-light"><i class="bi bi-search text-muted"></i></span>
-                <input type="text" class="form-control border-0 bg-light" placeholder="Buscar cliente...">
-            </div>
         </div>
 
         <div class="table-responsive">
@@ -87,84 +98,70 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Exemplo 1: Cliente já pagou via Pix -->
-                    <tr>
-                        <td><h5 class="mb-0 fw-bold text-dark">18:00</h5></td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex justify-content-center align-items-center me-2 fw-bold" style="width: 35px; height: 35px;">
-                                    M
+                    @forelse($jogosHoje as $jogo)
+                        <!-- Se já fez check-in, a linha inteira fica mais apagada (opacity-50) -->
+                        <tr class="{{ $jogo->status === 'finalizado' ? 'opacity-50' : '' }}">
+                            <td><h5 class="mb-0 fw-bold {{ $jogo->status === 'finalizado' ? 'text-muted' : 'text-dark' }}">{{ $jogo->horario }}</h5></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <!-- Pega a primeira letra do nome do cliente para o avatar -->
+                                    <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex justify-content-center align-items-center me-2 fw-bold" style="width: 35px; height: 35px;">
+                                        {{ strtoupper(substr($jogo->user->name ?? 'C', 0, 1)) }}
+                                    </div>
+                                    <span class="fw-semibold {{ $jogo->status === 'finalizado' ? 'text-muted' : 'text-dark' }}">{{ $jogo->user->name ?? 'Cliente' }}</span>
                                 </div>
-                                <span class="fw-semibold text-dark">Mariana S.</span>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="d-block fw-bold text-dark">Arena Sol Nascente</span>
-                            <small class="text-muted">Beach Tennis</small>
-                        </td>
-                        <td>
-                            <span class="badge bg-success bg-opacity-10 text-success border-0 px-2 py-1">
-                                <i class="bi bi-check-circle me-1"></i> Pix Pago
-                            </span>
-                        </td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-verde rounded-pill px-3 fw-bold shadow-sm">
-                                Liberar Entrada <i class="bi bi-door-open ms-1"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    
-                    <!-- Exemplo 2: Cliente escolheu pagar no local -->
-                    <tr>
-                        <td><h5 class="mb-0 fw-bold text-dark">19:00</h5></td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex justify-content-center align-items-center me-2 fw-bold" style="width: 35px; height: 35px;">
-                                    L
-                                </div>
-                                <span class="fw-semibold text-dark">Lucas A.</span>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="d-block fw-bold text-dark">Arena Praia Sul</span>
-                            <small class="text-muted">Vôlei de Praia</small>
-                        </td>
-                        <td>
-                            <span class="badge bg-warning bg-opacity-10 text-warning border-0 px-2 py-1">
-                                <i class="bi bi-clock me-1"></i> R$ 120 (Pendente)
-                            </span>
-                        </td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-warning text-dark rounded-pill px-3 fw-bold shadow-sm">
-                                Receber e Liberar <i class="bi bi-cash-coin ms-1"></i>
-                            </button>
-                        </td>
-                    </tr>
-
-                    <!-- Exemplo 3: Cliente já fez check-in -->
-                    <tr class="opacity-50">
-                        <td><h5 class="mb-0 fw-bold text-muted">16:00</h5></td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex justify-content-center align-items-center me-2 fw-bold" style="width: 35px; height: 35px;">
-                                    R
-                                </div>
-                                <span class="fw-semibold text-muted">Roberto C.</span>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="d-block fw-bold text-muted">Quadra Central</span>
-                            <small class="text-muted">Futevôlei</small>
-                        </td>
-                        <td>
-                            <span class="badge bg-success bg-opacity-10 text-success border-0 px-2 py-1">
-                                <i class="bi bi-check-circle me-1"></i> Cartão
-                            </span>
-                        </td>
-                        <td class="text-end">
-                            <span class="text-muted fw-bold small"><i class="bi bi-check2-all me-1"></i> Em Jogo</span>
-                        </td>
-                    </tr>
+                            </td>
+                            <td>
+                                <span class="d-block fw-bold {{ $jogo->status === 'finalizado' ? 'text-muted' : 'text-dark' }}">{{ $jogo->arena->nome ?? 'Quadra' }}</span>
+                                <small class="text-muted">{{ $jogo->arena->tipo_esporte ?? 'Esporte' }}</small>
+                            </td>
+                            
+                            <!-- Regras de Exibição do Pagamento -->
+                            <td>
+                                @if($jogo->status === 'finalizado')
+                                    <span class="badge bg-success bg-opacity-10 text-success border-0 px-2 py-1">
+                                        <i class="bi bi-check-circle me-1"></i> Pago
+                                    </span>
+                                @elseif($jogo->metodo_pagamento === 'pix')
+                                    <span class="badge bg-success bg-opacity-10 text-success border-0 px-2 py-1">
+                                        <i class="bi bi-lightning-charge-fill me-1"></i> Pix Pago
+                                    </span>
+                                @else
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border-0 px-2 py-1">
+                                        <i class="bi bi-clock me-1"></i> R$ {{ number_format($jogo->valor_total, 2, ',', '.') }}
+                                    </span>
+                                @endif
+                            </td>
+                            
+                            <!-- Regras do Botão de Ação -->
+                            <td class="text-end">
+                                @if($jogo->status === 'finalizado')
+                                    <span class="text-muted fw-bold small"><i class="bi bi-check2-all me-1"></i> Em Jogo</span>
+                                @else
+                                    <form action="/recepcao/reservas/{{ $jogo->id }}/finalizar" method="POST" class="m-0">
+                                        @csrf
+                                        @if($jogo->metodo_pagamento === 'pix')
+                                            <button type="submit" class="btn btn-sm btn-verde rounded-pill px-3 fw-bold shadow-sm">
+                                                Liberar Entrada <i class="bi bi-door-open ms-1"></i>
+                                            </button>
+                                        @else
+                                            <button type="submit" class="btn btn-sm btn-warning text-dark rounded-pill px-3 fw-bold shadow-sm">
+                                                Receber e Liberar <i class="bi bi-cash-coin ms-1"></i>
+                                            </button>
+                                        @endif
+                                    </form>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-calendar-x display-4 d-block mb-3 opacity-25"></i>
+                                <h5 class="fw-bold">Nenhuma reserva para hoje</h5>
+                                <p class="mb-0">A agenda do dia está livre no momento.</p>
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

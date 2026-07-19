@@ -15,8 +15,8 @@
             <div class="card card-stratos p-5 shadow-sm border-0">
                 
                 <div class="mb-4">
-                    <h4 class="text-success fw-bold mb-1">Adicionar Nova Quadra</h4>
-                    <p class="text-muted">Cadastre as informações da quadra para disponibilizar aos seus clientes.</p>
+                    <h4 class="text-success fw-bold mb-1">Adicionar Nova Arena</h4>
+                    <p class="text-muted">Cadastre as informações da arena para disponibilizar aos seus clientes.</p>
                 </div>
 
                 <!-- Exibição de Erros de Validação -->
@@ -31,29 +31,66 @@
                 @endif
 
                 <form action="/admin/arenas/salvar" method="POST">
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            document.querySelectorAll('.esporte-checkbox').forEach(function (checkbox) {
+                                const targetId = checkbox.getAttribute('data-target');
+                                const target = document.getElementById(targetId);
+
+                                const toggle = function () {
+                                    if (target) {
+                                        target.hidden = !checkbox.checked;
+                                    }
+                                };
+
+                                checkbox.addEventListener('change', toggle);
+                                toggle();
+                            });
+                        });
+                    </script>
                     @csrf
                     
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Nome / Identificação da Quadra</label>
-                        <input type="text" name="nome" class="form-control form-control-lg bg-light border-0 shadow-sm" placeholder="Ex: Quadra 1 - Areia" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Tipo de Esporte</label>
-                        <input type="text" name="tipo_esporte" class="form-control form-control-lg bg-light border-0 shadow-sm" placeholder="Ex: Beach Tennis, Vôlei, Society" required>
-                        <div class="form-text text-muted small mt-1"><i class="bi bi-info-circle me-1"></i> Digite a principal modalidade dessa quadra.</div>
+                        <label class="form-label small fw-bold text-muted text-uppercase">Nome / Identificação da Arena</label>
+                        <input type="text" name="nome" class="form-control form-control-lg bg-light border-0 shadow-sm" placeholder="Ex: Arena 1 - Areia" required>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Preço por Hora (R$)</label>
-                        <div class="input-group input-group-lg shadow-sm rounded-3">
-                            <span class="input-group-text border-0 bg-success bg-opacity-10 text-success fw-bold">R$</span>
-                            <input type="number" step="0.01" name="preco_hora" class="form-control border-0 bg-light" placeholder="0,00" required>
+                        <label class="form-label small fw-bold text-muted text-uppercase">Esportes que funcionarão na arena</label>
+                        <div class="border rounded-3 p-3 bg-light">
+                            @php $esportesFixos = ['Beach Vôlei', 'Beach Tênis', 'Futevôlei']; @endphp
+                            @foreach($esportesFixos as $esporte)
+                                @php $idEsporte = 'esporte-' . Str::slug($esporte); @endphp
+                                <div class="border rounded-3 p-3 mb-3 bg-white">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input esporte-checkbox" type="checkbox" name="esportes[]" value="{{ $esporte }}" id="{{ $idEsporte }}" data-target="turnos-{{ Str::slug($esporte) }}">
+                                        <label class="form-check-label fw-semibold" for="{{ $idEsporte }}">{{ $esporte }}</label>
+                                    </div>
+                                    <div class="row g-2 turnos-container" id="turnos-{{ Str::slug($esporte) }}" hidden>
+                                        <div class="col-12">
+                                            <div class="small fw-semibold text-success mb-2">Valor por horário</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small text-muted">Manhã</label>
+                                            <input type="number" step="0.01" name="precos[{{ $esporte }}][Manhã]" class="form-control form-control-sm" placeholder="0,00">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small text-muted">Tarde</label>
+                                            <input type="number" step="0.01" name="precos[{{ $esporte }}][Tarde]" class="form-control form-control-sm" placeholder="0,00">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small text-muted">Noite</label>
+                                            <input type="number" step="0.01" name="precos[{{ $esporte }}][Noite]" class="form-control form-control-sm" placeholder="0,00">
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
+                        <div class="form-text text-muted small mt-2"><i class="bi bi-info-circle me-1"></i> Marque os esportes que irão funcionar e defina o preço por turno para cada um.</div>
                     </div>
 
                     <button type="submit" class="btn btn-verde w-100 py-3 fw-bold rounded-pill shadow-sm mt-3">
-                        <i class="bi bi-check2-circle me-2"></i> Salvar Nova Quadra
+                        <i class="bi bi-check2-circle me-2"></i> Salvar Nova Arena
                     </button>
                 </form>
 
