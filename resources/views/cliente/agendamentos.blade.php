@@ -13,10 +13,11 @@
     });
 @endphp
 
+<div class="bg-gradient-stratos" style="min-height: 100vh;">
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
-            
+
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 rounded-3 mb-4" role="alert">
                     <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
@@ -155,5 +156,6 @@
 
         </div>
     </div>
+</div>
 </div>
 @endsection

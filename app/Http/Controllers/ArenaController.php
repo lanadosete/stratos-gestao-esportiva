@@ -58,7 +58,7 @@ class ArenaController extends Controller
 
     public function editar($id)
     {
-        $arena = Arena::findOrFail($id);
+        $arena = Arena::with(['esportes', 'precosTurno'])->findOrFail($id);
         return view('admin.arenas.editar', compact('arena'));
     }
 
@@ -66,17 +66,43 @@ class ArenaController extends Controller
     {
         $request->validate([
             'nome' => 'required|string',
-            'tipo_esporte' => 'required|string',
-            'preco_hora' => 'required|numeric',
         ]);
 
         $arena = Arena::findOrFail($id);
-        
+
         $arena->update([
             'nome' => $request->nome,
-            'tipo_esporte' => $request->tipo_esporte,
-            'preco_hora' => $request->preco_hora,
         ]);
+
+        $nomesSelecionados = $request->input('esportes', []);
+
+        // Remove esportes desmarcados e seus preços por turno
+        ArenaEsporte::where('arena_id', $arena->id)->whereNotIn('nome', $nomesSelecionados)->delete();
+        ArenaPrecoTurno::where('arena_id', $arena->id)->whereNotIn('esporte', $nomesSelecionados)->delete();
+
+        foreach ($nomesSelecionados as $nome) {
+            ArenaEsporte::firstOrCreate([
+                'arena_id' => $arena->id,
+                'nome' => $nome,
+            ], [
+                'ativo' => true,
+            ]);
+
+            $precos = $request->input('precos.' . $nome, []);
+            foreach ($precos as $turno => $valor) {
+                if ($valor !== null && $valor !== '') {
+                    ArenaPrecoTurno::updateOrCreate(
+                        ['arena_id' => $arena->id, 'esporte' => $nome, 'turno' => $turno],
+                        ['valor_hora' => $valor]
+                    );
+                } else {
+                    ArenaPrecoTurno::where('arena_id', $arena->id)
+                        ->where('esporte', $nome)
+                        ->where('turno', $turno)
+                        ->delete();
+                }
+            }
+        }
 
         return redirect('/admin/arenas')->with('success', 'Dados da quadra atualizados com sucesso!');
     }

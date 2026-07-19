@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('conteudo')
+<div class="bg-gradient-stratos" style="min-height: 100vh;">
 <div class="container py-5 d-flex justify-content-center align-items-center" style="min-height: 80vh;">
     <div class="card card-stratos p-5 shadow-sm border-0" style="width: 100%; max-width: 600px;">
         
@@ -99,5 +100,6 @@
         </form>
 
     </div>
+</div>
 </div>
 @endsection

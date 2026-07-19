@@ -1,8 +1,9 @@
 @extends('layouts.app')
 
 @section('conteudo')
+<div class="bg-gradient-stratos" style="min-height: 100vh;">
 <div class="container py-5">
-    
+
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 rounded-3 mb-4" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
@@ -56,5 +57,6 @@
             </div>
         @endforelse
     </div>
+</div>
 </div>
 @endsection

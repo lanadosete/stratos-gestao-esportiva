@@ -1,8 +1,9 @@
 @extends('layouts.app')
 
 @section('conteudo')
+<div class="bg-gradient-stratos" style="min-height: 100vh;">
 <div class="container py-5">
-    <div class="row mb-4 align-items-center">
+<div class="row mb-4 align-items-center">
         <div class="col">
             <h3 class="fw-bold mb-0">Painel Financeiro</h3>
             <p class="text-muted mb-0">Visão geral do faturamento das suas quadras em <strong class="text-capitalize">{{ $nomeMes }}</strong>.</p>
@@ -126,5 +127,6 @@
             </table>
         </div>
     </div>
+</div>
 </div>
 @endsection

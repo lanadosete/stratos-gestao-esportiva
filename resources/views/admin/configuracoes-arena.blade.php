@@ -1,8 +1,9 @@
 @extends('layouts.app')
 
 @section('conteudo')
+<div class="bg-gradient-stratos" style="min-height: 100vh;">
 <div class="container py-5">
-    <div class="row justify-content-center">
+<div class="row justify-content-center">
         <div class="col-md-10">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
                 <div>
@@ -140,5 +141,6 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection

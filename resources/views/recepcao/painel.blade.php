@@ -8,8 +8,9 @@
     $checkinsRealizados = $jogosHoje->where('status', 'finalizado')->count();
 @endphp
 
+<div class="bg-gradient-stratos" style="min-height: 100vh;">
 <div class="container py-5">
-    
+
     <!-- Alerta de Sucesso ao dar Baixa -->
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 rounded-3 mb-4" role="alert">
@@ -167,5 +168,6 @@
         </div>
         
     </div>
+</div>
 </div>
 @endsection

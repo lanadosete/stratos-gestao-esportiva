@@ -22,6 +22,10 @@
                     @else
                         <a href="/recepcao" class="btn btn-verde px-4 py-3 fw-bold rounded-pill shadow-sm">Acessar Recepção</a>
                     @endif
+
+                    <a href="/perfil" class="btn btn-outline-success px-4 py-3 fw-bold rounded-pill shadow-sm">
+                        <i class="bi bi-person me-1"></i> Meu Perfil
+                    </a>
                 @endauth
 
                 <a href="#como-funciona" class="btn btn-outline-secondary px-4 py-3 fw-bold rounded-pill shadow-sm">Como funciona</a>

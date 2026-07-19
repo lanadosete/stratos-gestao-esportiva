@@ -91,10 +91,8 @@
                                 Olá, {{ explode(' ', Auth::user()->name)[0] }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3" aria-labelledby="menuUsuario">
-                                @if(Auth::user()->tipo_conta === 'cliente')
-                                    <li><a class="dropdown-item fw-semibold text-muted mb-1" href="/cliente/perfil"><i class="bi bi-person me-2"></i> Meu Perfil</a></li>
-                                @endif
-                                
+                                <li><a class="dropdown-item fw-semibold text-muted mb-1" href="/perfil"><i class="bi bi-person me-2"></i> Meu Perfil</a></li>
+
                                 <li>
                                     <form action="/logout" method="POST">
                                         @csrf

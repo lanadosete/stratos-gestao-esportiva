@@ -86,18 +86,12 @@ $turno = $this->detectarTurno($hora);
             'status' => 'confirmado',
         ]);
 
-        return redirect('/agendamento/' . $reserva->id . '/sucesso');
-    }
-
-    public function sucesso($id)
-    {
-        $reserva = Reserva::with('arena.complexo')->findOrFail($id);
-        
-        if ($reserva->user_id !== Auth::id()) {
-            return redirect('/');
-        }
-
-        return view('agendamento.sucesso', compact('reserva'));
+        return redirect('/agendamento/pagamento?' . http_build_query([
+            'arena_id' => $request->arena_id,
+            'data' => $request->data_reserva,
+            'horario' => implode(' | ', $horariosSelecionados),
+            'esporte' => $request->esporte,
+        ]))->with('reserva_confirmada', $reserva->id);
     }
 
     private function detectarTurno(string $hora): string
