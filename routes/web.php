@@ -128,6 +128,29 @@ Route::middleware('auth')->group(function () {
         Route::get('/pagamento', function () { return view('agendamento.pagamento'); });
 
         Route::post('/finalizar', [ReservaController::class, 'salvar']);
+
+        // Busca de clientes cadastrados (usado por admin/funcionário ao reservar em nome de um cliente)
+        Route::get('/clientes-busca', function () {
+            if (!in_array(Auth::user()->tipo_conta, ['admin', 'funcionario'])) {
+                abort(403);
+            }
+
+            $termo = trim((string) request('q'));
+            if (strlen($termo) < 2) {
+                return response()->json([]);
+            }
+
+            $clientes = \App\Models\User::where('tipo_conta', 'cliente')
+                ->where(function ($query) use ($termo) {
+                    $query->where('name', 'like', "%{$termo}%")
+                          ->orWhere('email', 'like', "%{$termo}%");
+                })
+                ->orderBy('name')
+                ->limit(8)
+                ->get(['id', 'name', 'email']);
+
+            return response()->json($clientes);
+        });
     });
 
     Route::post('/reservas/{id}/cancelar', [ReservaController::class, 'cancelar']);
@@ -174,8 +197,8 @@ Route::middleware('auth')->group(function () {
             if (Auth::user()->tipo_conta !== 'admin') return redirect('/');
             $complexo = Complexo::where('user_id', Auth::id())->first();
             if (!$complexo) return redirect('/admin/complexo/nova');
-            
-            $arenas = $complexo->arenas;
+
+            $arenas = $complexo->arenas()->with('esportes')->get();
             $totalReservas = Reserva::whereIn('arena_id', $arenas->pluck('id'))
                 ->where('status', '!=', 'cancelado')
                 ->count();
@@ -191,10 +214,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/complexo/{complexoId}/funcionamento', [ComplexoConfiguracaoController::class, 'salvarFuncionamento']);
 
         // Gestão de Arenas
-        Route::get('/arenas', function () { 
+        Route::get('/arenas', function () {
             $complexo = Complexo::where('user_id', Auth::id())->first();
-            $arenas = $complexo ? $complexo->arenas : [];
-            return view('admin.arenas', compact('arenas')); 
+            $arenas = $complexo ? $complexo->arenas()->with('esportes')->get() : collect();
+            return view('admin.arenas', compact('arenas'));
         });
         Route::get('/arenas/nova', function () { return view('admin.arenas.nova'); });
         Route::post('/arenas/salvar', [ArenaController::class, 'salvar']);
@@ -217,5 +240,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/financeiro', [FinanceiroController::class, 'index']);
         Route::get('/equipe', function () { return view('admin.equipe'); });
         Route::post('/equipe/salvar', [EquipeController::class, 'salvar']);
+        Route::post('/equipe/{id}/atualizar', [EquipeController::class, 'atualizar']);
+        Route::post('/equipe/{id}/excluir', [EquipeController::class, 'excluir']);
     });
 });

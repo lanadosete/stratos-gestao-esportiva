@@ -39,6 +39,14 @@
                 </div>
             </div>
 
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-muted text-uppercase">WhatsApp</label>
+                <div class="input-group input-group-lg shadow-sm rounded-3">
+                    <span class="input-group-text border-0 bg-light"><i class="bi bi-whatsapp text-muted"></i></span>
+                    <input type="text" name="telefone" class="form-control border-0 bg-light" placeholder="(11) 99999-9999" required>
+                </div>
+            </div>
+
             <div class="mb-4">
                 <label class="form-label small fw-bold text-muted text-uppercase">Senha</label>
                 <div class="input-group input-group-lg shadow-sm rounded-3">

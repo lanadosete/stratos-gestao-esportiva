@@ -1,8 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('conteudo')
-<div class="bg-gradient-stratos" style="min-height: 100vh;">
-<div class="container py-5 d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+@section('admin-content')
+<div class="d-flex justify-content-center align-items-center" style="min-height: 70vh;">
     <div class="card card-stratos p-5 shadow-sm border-0" style="width: 100%; max-width: 600px;">
         <div class="text-center mb-5">
             <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle mb-3" style="width: 70px; height: 70px;">
@@ -107,6 +106,5 @@
             </button>
         </form>
     </div>
-</div>
 </div>
 @endsection

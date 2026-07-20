@@ -20,7 +20,7 @@
             <div class="d-flex gap-2 flex-wrap">
                 <!-- BOTÃO INTELIGENTE: Muda de acordo com quem está acessando -->
                 @guest
-                    <a href="/login" class="btn btn-verde px-4 py-3 fw-bold rounded-pill shadow-sm">Buscar arenas</a>
+                    <a href="/login?redirect=/agendamento" class="btn btn-verde px-4 py-3 fw-bold rounded-pill shadow-sm">Buscar arenas</a>
                 @endguest
                 
                 @auth
@@ -39,7 +39,34 @@
         
         <div class="col-md-6 mt-5 mt-md-0">
             <div class="card card-stratos border-0 shadow-lg rounded-4 overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1595435934242-4763e0202283?q=80&w=800" class="card-img-top" style="height: 300px; object-fit: cover;">
+                <div id="carouselHome" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000">
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <img src="/img/slideshow/slide-1.jpg" class="d-block w-100" style="height: 300px; object-fit: cover;" alt="Stratos">
+                        </div>
+                        <div class="carousel-item">
+                            <img src="/img/slideshow/slide-2.jpg" class="d-block w-100" style="height: 300px; object-fit: cover;" alt="Stratos">
+                        </div>
+                        <div class="carousel-item">
+                            <img src="/img/slideshow/slide-3.jpg" class="d-block w-100" style="height: 300px; object-fit: cover;" alt="Stratos">
+                        </div>
+                        <div class="carousel-item">
+                            <img src="/img/slideshow/slide-4.jpg" class="d-block w-100" style="height: 300px; object-fit: cover;" alt="Stratos">
+                        </div>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselHome" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselHome" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    </button>
+                    <div class="carousel-indicators">
+                        <button type="button" data-bs-target="#carouselHome" data-bs-slide-to="0" class="active" aria-current="true"></button>
+                        <button type="button" data-bs-target="#carouselHome" data-bs-slide-to="1"></button>
+                        <button type="button" data-bs-target="#carouselHome" data-bs-slide-to="2"></button>
+                        <button type="button" data-bs-target="#carouselHome" data-bs-slide-to="3"></button>
+                    </div>
+                </div>
                 <div class="card-body d-flex justify-content-around py-4 bg-white">
                     <div class="text-center"><h4 class="fw-bold text-success mb-0">+50</h4><small class="text-muted fw-semibold">Arenas</small></div>
                     <div class="text-center"><h4 class="fw-bold text-success mb-0">+1.000</h4><small class="text-muted fw-semibold">Reservas</small></div>

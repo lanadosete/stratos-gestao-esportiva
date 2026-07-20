@@ -21,8 +21,9 @@
         @endif
 
         <form action="/login" method="POST">
-            @csrf 
-            
+            @csrf
+            <input type="hidden" name="redirect" value="{{ request('redirect') }}">
+
             <div class="mb-3">
                 <label class="form-label small fw-bold text-muted text-uppercase">E-mail</label>
                 <div class="input-group input-group-lg shadow-sm rounded-3">

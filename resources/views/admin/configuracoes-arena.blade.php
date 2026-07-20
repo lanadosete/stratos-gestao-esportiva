@@ -1,8 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('conteudo')
-<div class="bg-gradient-stratos" style="min-height: 100vh;">
-<div class="container py-5">
+@section('admin-content')
 <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
@@ -10,17 +8,11 @@
                     <h3 class="fw-bold mb-1 text-dark">Configuração da {{ $arena->nome }}</h3>
                     <p class="text-muted mb-0">Defina funcionamento, esportes e preços por turno com a identidade visual do Stratos.</p>
                 </div>
-                <a href="/admin/arenas" class="btn btn-outline-success rounded-pill px-4 fw-bold">Voltar às Arenas</a>
+                <a href="/admin/arenas" class="btn btn-outline-success rounded-pill px-4 fw-bold text-nowrap flex-shrink-0">Voltar às Arenas</a>
             </div>
 
-            @if(session('success'))
-                <div class="alert alert-success border-0 rounded-3 shadow-sm mb-4">
-                    <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-                </div>
-            @endif
-
-            <div class="row g-4">
-                <div class="col-lg-4">
+            <div class="d-flex flex-wrap gap-4">
+                <div style="flex: 1 1 300px; min-width: 300px; max-width: 100%;">
                     <div class="card card-stratos border-0 shadow-sm rounded-4 p-4 h-100">
                         <h5 class="fw-bold text-success mb-3"><i class="bi bi-calendar3 me-2"></i> Dias de funcionamento</h5>
                         <form action="/admin/arena/{{ $arena->id }}/configuracoes/funcionamento" method="POST">
@@ -63,7 +55,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-4">
+                <div style="flex: 1 1 300px; min-width: 300px; max-width: 100%;">
                     <div class="card card-stratos border-0 shadow-sm rounded-4 p-4 h-100">
                         <h5 class="fw-bold text-success mb-3"><i class="bi bi-trophy me-2"></i> Esportes da arena</h5>
                         <form action="/admin/arena/{{ $arena->id }}/configuracoes/esporte" method="POST">
@@ -98,7 +90,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-4">
+                <div style="flex: 1 1 300px; min-width: 300px; max-width: 100%;">
                     <div class="card card-stratos border-0 shadow-sm rounded-4 p-4 h-100">
                         <h5 class="fw-bold text-success mb-3"><i class="bi bi-currency-dollar me-2"></i> Preços por turno</h5>
                         <form action="/admin/arena/{{ $arena->id }}/configuracoes/preco" method="POST">
@@ -141,6 +133,4 @@
             </div>
         </div>
     </div>
-</div>
-</div>
 @endsection

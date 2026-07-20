@@ -27,6 +27,9 @@
             </span>
             <h3 class="fw-bold mb-1 text-dark">Olá, {{ explode(' ', Auth::user()->name)[0] }}!</h3>
             <p class="text-muted mb-0">Gerencie as entradas e pagamentos do dia de hoje.</p>
+            @if(Auth::user()->telefone)
+                <p class="text-muted small mb-0 mt-1"><i class="bi bi-whatsapp text-success me-1"></i> {{ Auth::user()->telefone }}</p>
+            @endif
         </div>
         
         <div class="mt-3 mt-md-0 text-md-end">
@@ -104,12 +107,18 @@
                         <tr class="{{ $jogo->status === 'finalizado' ? 'opacity-50' : '' }}">
                             <td><h5 class="mb-0 fw-bold {{ $jogo->status === 'finalizado' ? 'text-muted' : 'text-dark' }}">{{ $jogo->horario }}</h5></td>
                             <td>
+                                @php $nomeExibido = $jogo->reservado_para ?: ($jogo->user->name ?? 'Cliente'); @endphp
                                 <div class="d-flex align-items-center">
                                     <!-- Pega a primeira letra do nome do cliente para o avatar -->
                                     <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex justify-content-center align-items-center me-2 fw-bold" style="width: 35px; height: 35px;">
-                                        {{ strtoupper(substr($jogo->user->name ?? 'C', 0, 1)) }}
+                                        {{ strtoupper(substr($nomeExibido, 0, 1)) }}
                                     </div>
-                                    <span class="fw-semibold {{ $jogo->status === 'finalizado' ? 'text-muted' : 'text-dark' }}">{{ $jogo->user->name ?? 'Cliente' }}</span>
+                                    <div>
+                                        <span class="fw-semibold d-block {{ $jogo->status === 'finalizado' ? 'text-muted' : 'text-dark' }}">{{ $nomeExibido }}</span>
+                                        @if($jogo->reservado_para)
+                                            <small class="text-muted">Reservado por {{ $jogo->user->name ?? 'funcionário' }}</small>
+                                        @endif
+                                    </div>
                                 </div>
                             </td>
                             <td>

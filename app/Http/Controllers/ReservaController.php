@@ -6,6 +6,7 @@ use App\Models\ArenaPrecoTurno;
 use App\Models\ComplexoFuncionamento;
 use App\Models\Reserva;
 use App\Models\GradeHorario;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -22,6 +23,29 @@ class ReservaController extends Controller
             'esporte' => 'required|string', // Importante para definir o preço
             'metodo_pagamento' => 'required|string',
         ]);
+
+        // 1.1 Se quem está reservando é admin/funcionário, a reserva pode ser feita em nome de um cliente
+        // já cadastrado (cliente_id) ou, na ausência de cadastro, anotada com o nome do cliente (reservado_para)
+        $usuarioReserva = Auth::id();
+        $reservadoPara = null;
+
+        if (in_array(Auth::user()->tipo_conta, ['admin', 'funcionario'])) {
+            if ($request->filled('cliente_id')) {
+                $cliente = User::where('id', $request->cliente_id)->where('tipo_conta', 'cliente')->first();
+
+                if (!$cliente) {
+                    return back()->withErrors(['cliente_id' => 'Cliente selecionado inválido.']);
+                }
+
+                $usuarioReserva = $cliente->id;
+            } else {
+                $request->validate([
+                    'reservado_para' => 'required|string|max:255',
+                ]);
+
+                $reservadoPara = $request->reservado_para;
+            }
+        }
 
         $dataReserva = Carbon::parse($request->data_reserva);
         $totalCalculado = 0;
@@ -77,7 +101,8 @@ $turno = $this->detectarTurno($hora);
 
         // 3. Salvando a reserva
         $reserva = Reserva::create([
-            'user_id' => Auth::id(),
+            'user_id' => $usuarioReserva,
+            'reservado_para' => $reservadoPara,
             'arena_id' => $request->arena_id,
             'data_reserva' => $request->data_reserva,
             'horario' => implode(' | ', $horariosSelecionados),

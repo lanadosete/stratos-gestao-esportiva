@@ -1,8 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('conteudo')
-<div class="bg-gradient-stratos" style="min-height: 100vh;">
-<div class="container py-5">
+@section('admin-content')
 <div class="row justify-content-center">
         <div class="col-md-8">
 
@@ -105,6 +103,4 @@
 
         </div>
     </div>
-</div>
-</div>
 @endsection

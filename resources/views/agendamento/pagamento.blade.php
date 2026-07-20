@@ -19,12 +19,12 @@
     $esporte = request('esporte') ?? $arena->tipo_esporte;
 
     // Se acabamos de finalizar o pagamento, carregamos a reserva para exibir a modal de confirmação
+    // (o id só chega aqui via flash de sessão, criado no mesmo request que gerou a reserva —
+    // inclusive quando um admin/funcionário reserva em nome de um cliente, então não faz sentido
+    // exigir que o user_id da reserva seja o do usuário logado)
     $reservaConfirmada = null;
     if (session('reserva_confirmada')) {
         $reservaConfirmada = \App\Models\Reserva::with('arena.complexo')->find(session('reserva_confirmada'));
-        if ($reservaConfirmada && $reservaConfirmada->user_id !== auth()->id()) {
-            $reservaConfirmada = null;
-        }
     }
 @endphp
 
@@ -62,21 +62,53 @@
                             <p class="text-muted mb-0">Confira os detalhes na janela de confirmação.</p>
                         </div>
                     @else
-                    <div class="card card-stratos p-4 shadow-sm border-0 mb-4 rounded-3">
-                        <h5 class="mb-3 fw-bold">Forma de pagamento</h5>
+                    <form action="/agendamento/finalizar" method="POST">
+                        @csrf
+                        <input type="hidden" name="arena_id" value="{{ $arena->id }}">
+                        <input type="hidden" name="data_reserva" value="{{ $dataReserva }}">
 
-                        <form action="/agendamento/finalizar" method="POST">
-                            @csrf
-                            <input type="hidden" name="arena_id" value="{{ $arena->id }}">
-                            <input type="hidden" name="data_reserva" value="{{ $dataReserva }}">
+                        <!-- CORREÇÃO 1: Enviar como array para o controller (um input por horário) -->
+                        @foreach ($horariosArray as $h)
+                            <input type="hidden" name="horarios[]" value="{{ $h }}">
+                        @endforeach
 
-                            <!-- CORREÇÃO 1: Enviar como array para o controller (um input por horário) -->
-                            @foreach ($horariosArray as $h)
-                                <input type="hidden" name="horarios[]" value="{{ $h }}">
-                            @endforeach
+                        <!-- CORREÇÃO 2: Enviar o esporte -->
+                        <input type="hidden" name="esporte" value="{{ $esporte }}">
 
-                            <!-- CORREÇÃO 2: Enviar o esporte -->
-                            <input type="hidden" name="esporte" value="{{ $esporte }}">
+                        @if(in_array(Auth::user()->tipo_conta, ['admin', 'funcionario']))
+                            <div class="card card-stratos p-4 shadow-sm border-0 mb-4 rounded-3">
+                                <h5 class="mb-3 fw-bold">Esta reserva é para</h5>
+
+                                <div class="btn-group w-100 mb-3" role="group">
+                                    <input type="radio" class="btn-check" name="modo-cliente" id="modo-cadastrado" checked onchange="toggleModoCliente()">
+                                    <label class="btn btn-outline-success" for="modo-cadastrado">Cliente cadastrado</label>
+
+                                    <input type="radio" class="btn-check" name="modo-cliente" id="modo-avulso" onchange="toggleModoCliente()">
+                                    <label class="btn btn-outline-success" for="modo-avulso">Sem cadastro</label>
+                                </div>
+
+                                <div id="bloco-cliente-cadastrado">
+                                    <label class="form-label small fw-bold text-muted text-uppercase">Buscar cliente (nome ou e-mail)</label>
+                                    <div class="position-relative">
+                                        <input type="text" id="busca-cliente" class="form-control form-control-lg bg-light border-0" placeholder="Digite para buscar..." autocomplete="off">
+                                        <div id="resultados-cliente" class="list-group position-absolute w-100 mt-1 shadow-sm rounded-3 overflow-auto" style="z-index: 10; max-height: 220px; display: none;"></div>
+                                    </div>
+                                    <div id="cliente-selecionado" class="alert alert-success d-none mt-2 mb-0 py-2 px-3 d-flex justify-content-between align-items-center">
+                                        <span id="cliente-selecionado-nome" class="small fw-semibold"></span>
+                                        <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="limparClienteSelecionado()">trocar</button>
+                                    </div>
+                                    <input type="hidden" name="cliente_id" id="input-cliente-id">
+                                </div>
+
+                                <div id="bloco-sem-cadastro" class="d-none">
+                                    <label class="form-label small fw-bold text-muted text-uppercase">Reservado para o(a):</label>
+                                    <input type="text" name="reservado_para" id="input-reservado-para" class="form-control form-control-lg bg-light border-0" placeholder="Nome do cliente" disabled>
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="card card-stratos p-4 shadow-sm border-0 mb-4 rounded-3">
+                            <h5 class="mb-3 fw-bold">Forma de pagamento</h5>
 
                             <!-- O valor_total não é estritamente necessário no form, pois o Controller recalcula,
                                  mas mantive para não quebrar sua lógica de front, se precisar -->
@@ -103,8 +135,8 @@
                             <button type="submit" id="btn-pagar" class="btn btn-verde mt-4 w-100 py-3 fw-bold rounded-pill shadow-sm fs-5">
                                 Finalizar Reserva
                             </button>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                     @endif
                 </div>
 
@@ -164,7 +196,96 @@
             msg.innerHTML = '<i class="bi bi-info-circle me-1"></i> O pagamento será realizado na recepção.';
         }
     }
+
+    function toggleModoCliente() {
+        const cadastrado = document.getElementById('modo-cadastrado').checked;
+        const inputReservadoPara = document.getElementById('input-reservado-para');
+
+        document.getElementById('bloco-cliente-cadastrado').classList.toggle('d-none', !cadastrado);
+        document.getElementById('bloco-sem-cadastro').classList.toggle('d-none', cadastrado);
+        inputReservadoPara.disabled = cadastrado;
+
+        if (cadastrado) {
+            inputReservadoPara.value = '';
+        } else {
+            limparClienteSelecionado();
+            document.getElementById('busca-cliente').value = '';
+        }
+    }
+
+    function limparClienteSelecionado() {
+        document.getElementById('input-cliente-id').value = '';
+        document.getElementById('cliente-selecionado').classList.add('d-none');
+    }
+
+    const buscaClienteInput = document.getElementById('busca-cliente');
+    if (buscaClienteInput) {
+        let buscaTimeout;
+
+        buscaClienteInput.addEventListener('input', function () {
+            clearTimeout(buscaTimeout);
+            const termo = this.value.trim();
+            const resultados = document.getElementById('resultados-cliente');
+
+            document.getElementById('input-cliente-id').value = '';
+            document.getElementById('cliente-selecionado').classList.add('d-none');
+
+            if (termo.length < 2) {
+                resultados.style.display = 'none';
+                resultados.innerHTML = '';
+                return;
+            }
+
+            buscaTimeout = setTimeout(function () {
+                fetch('/agendamento/clientes-busca?q=' + encodeURIComponent(termo))
+                    .then(function (r) { return r.json(); })
+                    .then(function (clientes) {
+                        resultados.innerHTML = '';
+
+                        if (clientes.length === 0) {
+                            resultados.style.display = 'none';
+                            return;
+                        }
+
+                        clientes.forEach(function (c) {
+                            const item = document.createElement('button');
+                            item.type = 'button';
+                            item.className = 'list-group-item list-group-item-action';
+
+                            const strong = document.createElement('strong');
+                            strong.textContent = c.name;
+                            const small = document.createElement('small');
+                            small.className = 'text-muted d-block';
+                            small.textContent = c.email;
+
+                            item.appendChild(strong);
+                            item.appendChild(small);
+
+                            item.addEventListener('click', function () {
+                                document.getElementById('input-cliente-id').value = c.id;
+                                document.getElementById('cliente-selecionado-nome').textContent = c.name + ' (' + c.email + ')';
+                                document.getElementById('cliente-selecionado').classList.remove('d-none');
+                                resultados.style.display = 'none';
+                                resultados.innerHTML = '';
+                                buscaClienteInput.value = '';
+                            });
+
+                            resultados.appendChild(item);
+                        });
+
+                        resultados.style.display = 'block';
+                    })
+                    .catch(function () { resultados.style.display = 'none'; });
+            }, 300);
+        });
+    }
 </script>
+
+@php
+    $souStaff = in_array(Auth::user()->tipo_conta, ['admin', 'funcionario']);
+    $linkAgendamentos = $souStaff ? '/recepcao' : '/cliente/agendamentos';
+    $labelAgendamentos = $souStaff ? 'Ver Agenda do Dia' : 'Ver Meus Agendamentos';
+@endphp
 
 @if ($reservaConfirmada)
 <!-- Modal de confirmação -->
@@ -174,7 +295,10 @@
             <div class="modal-body p-4">
                 <i class="bi bi-check-circle-fill text-success display-1 mb-3 d-block"></i>
                 <h4 class="fw-bold mb-2" id="modalConfirmacaoLabel">Pagamento confirmado!</h4>
-                <p class="text-muted mb-1">Sua reserva na <strong>{{ $reservaConfirmada->arena->nome ?? 'quadra' }}</strong> foi confirmada com sucesso.</p>
+                <p class="text-muted mb-1">
+                    A reserva {{ $reservaConfirmada->reservado_para ? 'para ' . $reservaConfirmada->reservado_para : 'na sua conta' }}
+                    na <strong>{{ $reservaConfirmada->arena->nome ?? 'quadra' }}</strong> foi confirmada com sucesso.
+                </p>
                 <p class="text-muted mb-4">
                     {{ \Carbon\Carbon::parse($reservaConfirmada->data_reserva)->format('d/m/Y') }} às {{ $reservaConfirmada->horario }}
                 </p>
@@ -184,8 +308,8 @@
                         <i class="bi bi-plus-circle me-2"></i> Realizar Novo Agendamento
                     </a>
 
-                    <a href="/cliente/agendamentos" class="btn btn-outline-dark py-3 fw-bold rounded-pill">
-                        <i class="bi bi-calendar-check me-2"></i> Ver Meus Agendamentos
+                    <a href="{{ $linkAgendamentos }}" class="btn btn-outline-dark py-3 fw-bold rounded-pill">
+                        <i class="bi bi-calendar-check me-2"></i> {{ $labelAgendamentos }}
                     </a>
 
                     <a href="/" class="btn btn-light py-3 fw-bold rounded-pill">

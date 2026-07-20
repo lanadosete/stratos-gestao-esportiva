@@ -12,6 +12,7 @@ class Reserva extends Model
     // A solução: Liberamos esses campos para serem salvos via Reserva::create()
     protected $fillable = [
         'user_id',
+        'reservado_para',
         'arena_id',
         'data_reserva',
         'horario',

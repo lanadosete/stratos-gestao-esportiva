@@ -16,6 +16,7 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
+            'telefone' => 'required|string|max:20',
             'password' => 'required|string|min:6',
         ]);
 
@@ -23,9 +24,10 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'telefone' => $request->telefone,
             'password' => Hash::make($request->password),
             // Se o botão foi marcado, vira admin. Se não, vira cliente.
-            'tipo_conta' => $request->has('is_admin') ? 'admin' : 'cliente', 
+            'tipo_conta' => $request->has('is_admin') ? 'admin' : 'cliente',
         ]);
 
         // 3. Faz o login automático
@@ -58,7 +60,12 @@ class AuthController extends Controller
             if (Auth::user()->tipo_conta === 'funcionario') {
                 return redirect('/recepcao');
             }
-            
+
+            $redirect = $request->input('redirect');
+            if ($redirect && str_starts_with($redirect, '/')) {
+                return redirect($redirect);
+            }
+
             return redirect('/');
         }
 

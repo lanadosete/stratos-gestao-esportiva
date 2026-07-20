@@ -1,8 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('conteudo')
-<div class="bg-gradient-stratos" style="min-height: 100vh;">
-<div class="container py-5">
+@section('admin-content')
 <div class="row mb-4 align-items-center">
         <div class="col">
             <h3 class="fw-bold mb-0">Painel Financeiro</h3>
@@ -11,10 +9,10 @@
     </div>
 
     <!-- 4 Cartões de Indicadores (Faturamento, Pix, Recebido Local, Pendente Local) -->
-    <div class="row g-4 mb-5">
-        
+    <div class="d-flex flex-wrap gap-4 mb-5">
+
         <!-- 1. Faturamento Total -->
-        <div class="col-md-3">
+        <div style="flex: 1 1 200px; min-width: 200px; max-width: 100%;">
             <div class="card card-stratos border-0 shadow-sm p-4 h-100 rounded-4 bg-dark text-white">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <h6 class="fw-semibold mb-0 text-white-50">Faturamento Total</h6>
@@ -27,7 +25,7 @@
         </div>
 
         <!-- 2. Garantido no Pix -->
-        <div class="col-md-3">
+        <div style="flex: 1 1 200px; min-width: 200px; max-width: 100%;">
             <div class="card card-stratos border-0 shadow-sm p-4 h-100 rounded-4 border-start border-success border-4">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <h6 class="fw-semibold mb-0 text-muted">Garantido no Pix</h6>
@@ -41,7 +39,7 @@
         </div>
 
         <!-- 3. Recebido no Balcão (NOVO) -->
-        <div class="col-md-3">
+        <div style="flex: 1 1 200px; min-width: 200px; max-width: 100%;">
             <div class="card card-stratos border-0 shadow-sm p-4 h-100 rounded-4 border-start border-primary border-4">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <h6 class="fw-semibold mb-0 text-muted">Recebido no Local</h6>
@@ -55,7 +53,7 @@
         </div>
 
         <!-- 4. A Receber no Local -->
-        <div class="col-md-3">
+        <div style="flex: 1 1 200px; min-width: 200px; max-width: 100%;">
             <div class="card card-stratos border-0 shadow-sm p-4 h-100 rounded-4 border-start border-warning border-4">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <h6 class="fw-semibold mb-0 text-muted">A Receber no Local</h6>
@@ -67,7 +65,7 @@
                 <small class="text-muted mt-2 d-block">Cobrar na recepção</small>
             </div>
         </div>
-        
+
     </div>
 
     <h5 class="fw-bold mb-3">Histórico de Reservas</h5>
@@ -127,6 +125,4 @@
             </table>
         </div>
     </div>
-</div>
-</div>
 @endsection

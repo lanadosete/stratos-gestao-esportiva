@@ -11,7 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 // ADICIONAMOS O 'tipo_conta' AQUI PARA LIBERAR O ACESSO
-#[Fillable(['name', 'email', 'password', 'tipo_conta'])]
+#[Fillable(['name', 'email', 'telefone', 'password', 'tipo_conta'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {

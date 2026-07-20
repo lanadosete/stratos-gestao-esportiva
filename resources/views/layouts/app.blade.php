@@ -60,10 +60,10 @@
                         <!-- Botões específicos do Admin -->
                         @if(Auth::user()->tipo_conta === 'admin')
                             <li class="nav-item">
-                                <a class="nav-link fw-bold text-success" href="/admin/dashboard"><i class="bi bi-speedometer2 me-1"></i> Meu Painel</a>
+                                <a class="nav-link fw-semibold text-muted" href="/recepcao"><i class="bi bi-pc-display-horizontal me-1"></i> Recepção</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link fw-semibold text-muted" href="/recepcao">Recepção</a>
+                                <a class="nav-link fw-semibold text-muted" href="/agendamento"><i class="bi bi-calendar-plus me-1"></i> Nova Reserva</a>
                             </li>
                         @endif
 
@@ -71,6 +71,9 @@
                         @if(Auth::user()->tipo_conta === 'funcionario')
                             <li class="nav-item">
                                 <a class="nav-link fw-bold text-success" href="/recepcao"><i class="bi bi-pc-display-horizontal me-1"></i> Painel de Recepção</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold text-muted" href="/agendamento"><i class="bi bi-calendar-plus me-1"></i> Nova Reserva</a>
                             </li>
                         @endif
 
@@ -84,25 +87,34 @@
                             </li>
                         @endif
 
-                        <!-- Dropdown de Perfil (Aparece para todos que estão logados) -->
-                        <li class="nav-item dropdown ms-2 border-start ps-3">
-                            <a class="nav-link dropdown-toggle fw-bold text-dark d-flex align-items-center" href="#" id="menuUsuario" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <div class="bg-success bg-opacity-25 text-success rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 35px; height: 35px;">
-                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                                </div>
-                                Olá, {{ explode(' ', Auth::user()->name)[0] }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3" aria-labelledby="menuUsuario">
-                                <li><a class="dropdown-item fw-semibold text-muted mb-1" href="/perfil"><i class="bi bi-person me-2"></i> Meu Perfil</a></li>
+                        @if(Auth::user()->tipo_conta === 'admin')
+                            <!-- Admin já vê seu perfil (avatar + nome) fixo na sidebar do painel -->
+                            <li class="nav-item ms-2">
+                                <a class="btn btn-verde rounded-pill px-4 fw-bold shadow-sm" href="/admin/dashboard">
+                                    <i class="bi bi-speedometer2 me-1"></i> Meu Painel
+                                </a>
+                            </li>
+                        @else
+                            <!-- Dropdown de Perfil (Funcionário e Cliente) -->
+                            <li class="nav-item dropdown ms-2 border-start ps-3">
+                                <a class="nav-link dropdown-toggle fw-bold text-dark d-flex align-items-center" href="#" id="menuUsuario" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="bg-success bg-opacity-25 text-success rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 35px; height: 35px;">
+                                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                    </div>
+                                    Olá, {{ explode(' ', Auth::user()->name)[0] }}
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3" aria-labelledby="menuUsuario">
+                                    <li><a class="dropdown-item fw-semibold text-muted mb-1" href="/perfil"><i class="bi bi-person me-2"></i> Meu Perfil</a></li>
 
-                                <li>
-                                    <form action="/logout" method="POST">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item text-danger fw-bold"><i class="bi bi-box-arrow-right me-2"></i> Sair da Conta</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
+                                    <li>
+                                        <form action="/logout" method="POST">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item text-danger fw-bold"><i class="bi bi-box-arrow-right me-2"></i> Sair da Conta</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endif
                     @endauth
                     
                 </ul>
