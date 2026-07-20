@@ -38,6 +38,7 @@
     .flatpickr-day.selected { background: #28a745 !important; border-color: #28a745 !important; }
 </style>
 
+<div class="bg-gradient-stratos" style="min-height: 100vh;">
 <div class="container-fluid p-0">
     <div class="row justify-content-center">
         <div class="col-md-10">
@@ -121,6 +122,7 @@
 
         </div>
     </div>
+</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>

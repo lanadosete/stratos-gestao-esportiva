@@ -5,9 +5,7 @@
     <div class="card card-stratos p-5 shadow-sm border-0" style="width: 100%; max-width: 500px;">
         
         <div class="text-center mb-4">
-            <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle mb-3" style="width: 60px; height: 60px;">
-                <i class="bi bi-person-plus fs-2"></i>
-            </div>
+            <img src="/img/logo-stratos.svg" alt="Stratos" class="mb-3" style="height: 64px;">
             <h3 class="text-dark fw-bold mb-1">Crie sua conta</h3>
             <p class="text-muted">Junte-se ao <strong class="text-success">STRATOS</strong></p>
         </div>

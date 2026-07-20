@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stratos - Gestão Esportiva</title>
-    
+    <link rel="icon" type="image/svg+xml" href="/img/logo-stratos.svg">
+
     <!-- Fontes do Google -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
@@ -33,7 +34,8 @@
         <div class="container-fluid px-4">
             <!-- Logo ou Nome do Sistema -->
             <a class="navbar-brand text-success fw-bold d-flex align-items-center" href="/">
-                <i class="bi bi-layers-fill me-2 fs-4"></i> STRATOS
+                <img src="/img/logo-stratos.svg" alt="Stratos" height="32" class="me-2">
+                STRATOS
             </a>
             
             <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

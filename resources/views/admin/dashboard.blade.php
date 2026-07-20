@@ -7,6 +7,7 @@
         <!-- Sidebar Inteligente -->
         <div class="col-md-2 p-4 sidebar-stratos border-end bg-white" style="min-height: 90vh;">
             <div class="mb-5 text-center text-md-start">
+                <img src="/img/logo-stratos.svg" alt="Stratos" class="mb-2" style="height: 40px;">
                 <h3 class="fw-bold text-success mb-0">Stratos</h3>
                 <span class="badge bg-dark text-white rounded-pill px-3">Gestão</span>
             </div>

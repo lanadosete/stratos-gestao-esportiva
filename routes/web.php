@@ -27,6 +27,7 @@ Route::get('/', function () { return view('home'); });
 Route::middleware('guest')->group(function () {
     Route::get('/cadastro', function () { return view('auth.register'); });
     Route::get('/login', function () { return view('auth.login'); })->name('login');
+    Route::get('/login/administrativo', function () { return view('auth.login-admin'); });
     Route::post('/cadastro', [AuthController::class, 'registrar']);
     Route::post('/login', [AuthController::class, 'entrar']);
 });

@@ -2,9 +2,18 @@
 
 @section('conteudo')
 <div class="container py-5">
+    @guest
+        <div class="d-flex justify-content-end mb-4">
+            <a href="/login/administrativo" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-semibold">
+                <i class="bi bi-shield-lock me-1"></i> Sou proprietário ou funcionário
+            </a>
+        </div>
+    @endguest
+
     <div class="row align-items-center mb-5">
         <div class="col-md-6">
-            <span class="text-success fw-bold">● BEM-VINDO AO STRATOS</span>
+            <img src="/img/logo-stratos.svg" alt="Stratos" class="mb-3" style="height: 56px;">
+            <span class="text-success fw-bold d-block">● BEM-VINDO AO STRATOS</span>
             <h1 class="display-4 fw-bold mt-2 text-dark">Gestão inteligente para o <span class="text-success">esporte.</span></h1>
             <p class="text-muted mt-3 mb-4 fs-5">O Stratos é o sistema completo para gerenciar arenas, reservas e horários de forma simples, rápida e eficiente.</p>
             
@@ -22,10 +31,6 @@
                     @else
                         <a href="/recepcao" class="btn btn-verde px-4 py-3 fw-bold rounded-pill shadow-sm">Acessar Recepção</a>
                     @endif
-
-                    <a href="/perfil" class="btn btn-outline-success px-4 py-3 fw-bold rounded-pill shadow-sm">
-                        <i class="bi bi-person me-1"></i> Meu Perfil
-                    </a>
                 @endauth
 
                 <a href="#como-funciona" class="btn btn-outline-secondary px-4 py-3 fw-bold rounded-pill shadow-sm">Como funciona</a>
@@ -51,19 +56,43 @@
     </div>
 
     <div class="row mt-4 g-4 pb-5">
-        <!-- Substituindo os emojis por ícones reais -->
         @php
             $esportes = [
-                ['nome' => 'Futevôlei', 'icone' => 'bi-dribbble'],
-                ['nome' => 'Vôlei', 'icone' => 'bi-circle'],
-                ['nome' => 'Beach Tennis', 'icone' => 'bi-trophy']
+                ['nome' => 'Futevôlei', 'bola' => 'futevolei'],
+                ['nome' => 'Vôlei', 'bola' => 'volei'],
+                ['nome' => 'Beach Tennis', 'bola' => 'beach-tenis'],
             ];
         @endphp
-        
+
         @foreach($esportes as $esporte)
         <div class="col-md-4">
             <div class="card card-stratos p-4 text-center border-0 shadow-sm h-100 rounded-4">
-                <div class="mb-3 text-success display-5"><i class="bi {{ $esporte['icone'] }}"></i></div> 
+                <div class="mb-3 text-success" style="font-size: 3rem;">
+                    @switch($esporte['bola'])
+                        @case('volei')
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="9.3"/>
+                                <path d="M12 12C10.3 9.2 10.3 5.6 12 2.7"/>
+                                <path d="M12 12C10.3 9.2 10.3 5.6 12 2.7" transform="rotate(120 12 12)"/>
+                                <path d="M12 12C10.3 9.2 10.3 5.6 12 2.7" transform="rotate(240 12 12)"/>
+                            </svg>
+                            @break
+                        @case('futevolei')
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="9.3"/>
+                                <path d="M12 7.8 16 10.7 14.5 15.4 9.5 15.4 8 10.7Z" stroke-linejoin="round"/>
+                                <path d="M12 7.8V3M16 10.7l4.6-1.5M14.5 15.4l2.8 3.9M9.5 15.4l-2.8 3.9M8 10.7 3.4 9.2"/>
+                            </svg>
+                            @break
+                        @case('beach-tenis')
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="9.3"/>
+                                <path d="M3.6 7c3 2 3 8 0 10"/>
+                                <path d="M20.4 7c-3 2-3 8 0 10"/>
+                            </svg>
+                            @break
+                    @endswitch
+                </div>
                 <h5 class="fw-bold text-dark">{{ $esporte['nome'] }}</h5>
                 <p class="small text-muted mb-0">Quadras de {{ strtolower($esporte['nome']) }} com estrutura completa.</p>
             </div>

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('conteudo')
+<div class="bg-gradient-stratos" style="min-height: 100vh;">
 <div class="container-fluid p-0">
     <div class="row justify-content-center">
         <div class="col-md-10">
@@ -56,5 +57,6 @@
 
         </div>
     </div>
+</div>
 </div>
 @endsection
