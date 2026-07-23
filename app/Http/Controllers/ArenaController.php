@@ -24,7 +24,6 @@ class ArenaController extends Controller
             'complexo_id' => $complexo->id,
             'nome' => $request->nome,
             'tipo_esporte' => 'Multiuso',
-            'preco_hora' => 0,
         ]);
 
         $nomes = $request->input('esportes', []);

@@ -20,17 +20,35 @@
         .card-stratos { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .btn-verde { background-color: #28a745; color: white; transition: 0.2s ease-in-out; }
         .btn-verde:hover { background-color: #218838; color: white; transform: translateY(-1px); }
-        .navbar { box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .navbar { box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative; }
         .bg-gradient-stratos { background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%); }
         .sidebar-stratos { background: linear-gradient(180deg, #dcedc8 0%, #ffffff 100%); }
         .text-success { color: #28a745 !important; }
         .border-success { border-color: #28a745 !important; }
+
+        /* Menu sanduíche: só existe em telas bem pequenas (abaixo do breakpoint "sm")
+           e flutua por cima do conteúdo em vez de empurrá-lo para baixo. */
+        @media (max-width: 575.98px) {
+            .navbar-collapse {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                z-index: 1030;
+                background: #ffffff;
+                padding: 1rem 1.5rem 1.25rem;
+                box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+                border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+                max-height: calc(100vh - 100%);
+                overflow-y: auto;
+            }
+        }
     </style>
 </head>
 <body>
     
     <!-- Menu Superior (Navbar) -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom border-success border-3">
+    <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom border-success border-3">
         <div class="container-fluid px-4">
             <!-- Logo ou Nome do Sistema -->
             <a class="navbar-brand text-success fw-bold d-flex align-items-center" href="/">

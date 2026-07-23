@@ -16,9 +16,6 @@
             <a href="/admin/dashboard" class="admin-nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}">
                 <i class="bi bi-grid-1x2-fill"></i> <span>Painel Geral</span>
             </a>
-            <a href="/recepcao" class="admin-nav-link {{ request()->is('recepcao*') ? 'active' : '' }}">
-                <i class="bi bi-pc-display-horizontal"></i> <span>Recepção (Hoje)</span>
-            </a>
             <a href="/admin/arenas" class="admin-nav-link {{ (request()->is('admin/arenas*') || request()->is('admin/arena/*')) ? 'active' : '' }}">
                 <i class="bi bi-geo-alt-fill"></i> <span>Minhas Arenas</span>
             </a>

@@ -37,7 +37,6 @@ class ReservaPorEsporteETurnoTest extends TestCase
             'complexo_id' => $complexo->id,
             'nome' => 'Arena 1',
             'tipo_esporte' => 'Multiuso',
-            'preco_hora' => 100,
         ]);
 
         ComplexoFuncionamento::create([

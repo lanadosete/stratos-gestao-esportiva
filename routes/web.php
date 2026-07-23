@@ -3,15 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\{
-    AdminConfiguracaoController,
     AuthController,
     ArenaController,
-    ComplexoConfiguracaoController,
     ComplexoController,
     EquipeController,
     FinanceiroController,
-    ReservaController,
-    GradeHorarioController
+    ReservaController
 };
 use App\Models\{Complexo, Reserva};
 use Carbon\Carbon;
@@ -211,7 +208,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/complexo/{id}/editar', [ComplexoController::class, 'editar']);
         Route::post('/complexo/salvar', [ComplexoController::class, 'salvar']);
         Route::post('/complexo/{id}/atualizar', [ComplexoController::class, 'atualizar']);
-        Route::post('/complexo/{complexoId}/funcionamento', [ComplexoConfiguracaoController::class, 'salvarFuncionamento']);
 
         // Gestão de Arenas
         Route::get('/arenas', function () {
@@ -225,17 +221,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/arenas/{id}/atualizar', [ArenaController::class, 'atualizar']);
         Route::post('/arenas/{id}/excluir', [ArenaController::class, 'excluir']);
 
-        // Grade de Horários (Configuração de Preços Dinâmicos)
-        Route::get('/arena/{id}/grade', [GradeHorarioController::class, 'configurar']);
-        Route::post('/arena/grade/salvar', [GradeHorarioController::class, 'salvar']);
-        Route::delete('/arena/grade/excluir/{id}', [GradeHorarioController::class, 'excluir']);
-
-        // Nova configuração de funcionamento, esportes e preços por turno
-        Route::get('/arena/{arenaId}/configuracoes', [AdminConfiguracaoController::class, 'configuracoes']);
-        Route::post('/arena/{arenaId}/configuracoes/funcionamento', [AdminConfiguracaoController::class, 'salvarFuncionamento']);
-        Route::post('/arena/{arenaId}/configuracoes/esporte', [AdminConfiguracaoController::class, 'salvarEsporte']);
-        Route::post('/arena/{arenaId}/configuracoes/preco', [AdminConfiguracaoController::class, 'salvarPreco']);
-        
         // Financeiro e Equipe
         Route::get('/financeiro', [FinanceiroController::class, 'index']);
         Route::get('/equipe', function () { return view('admin.equipe'); });
