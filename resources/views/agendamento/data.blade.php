@@ -26,9 +26,15 @@
             ->flatMap(fn($h) => array_map('trim', explode('|', $h)))
             ->toArray();
 
+        $horaAtual = now()->hour;
+
         for ($h = $abertura; $h < $fechamento; $h++) {
             $hora = str_pad($h, 2, '0', STR_PAD_LEFT) . ':00';
-            $horariosIniciais[] = ['hora' => $hora, 'ocupado' => in_array($hora, $ocupados)];
+            $horariosIniciais[] = [
+                'hora' => $hora,
+                'ocupado' => in_array($hora, $ocupados),
+                'passado' => $h <= $horaAtual, // bloco inicial é sempre para o dia de hoje
+            ];
         }
     }
 @endphp
@@ -171,6 +177,7 @@
 
         horarios.forEach(function (item, index) {
             const id = 'h-' + index;
+            const indisponivel = item.ocupado || item.passado;
 
             const input = document.createElement('input');
             input.type = 'checkbox';
@@ -178,18 +185,22 @@
             input.id = id;
             input.value = item.hora;
             input.autocomplete = 'off';
-            input.disabled = item.ocupado;
+            input.disabled = indisponivel;
             input.addEventListener('change', atualizarResumo);
 
             const label = document.createElement('label');
-            label.className = item.ocupado
+            label.className = indisponivel
                 ? 'btn btn-outline-secondary rounded p-3 text-center opacity-50'
                 : 'btn btn-outline-success rounded p-3 text-center fw-semibold';
             label.style.minWidth = '100px';
             label.htmlFor = id;
-            label.innerHTML = item.ocupado
-                ? (item.hora + '<br><small class="fw-normal">Ocupado</small>')
-                : item.hora;
+            if (item.ocupado) {
+                label.innerHTML = item.hora + '<br><small class="fw-normal">Ocupado</small>';
+            } else if (item.passado) {
+                label.innerHTML = item.hora + '<br><small class="fw-normal">Horário passado</small>';
+            } else {
+                label.innerHTML = item.hora;
+            }
 
             container.appendChild(input);
             container.appendChild(label);

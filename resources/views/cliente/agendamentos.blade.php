@@ -44,8 +44,9 @@
                     @forelse($proximosJogos as $reserva)
                         <div class="list-group-item p-4 border-bottom border-light">
                             <div class="row align-items-center">
+                                @php $statusCalc = $reserva->status_calculado; @endphp
                                 <div class="col-md-2 text-center border-end border-light mb-3 mb-md-0">
-                                    <h2 class="fw-bold @if($reserva->status == 'cancelado') text-danger @else text-success @endif mb-0">
+                                    <h2 class="fw-bold @if($statusCalc === 'cancelado') text-danger @else text-success @endif mb-0">
                                         {{ \Carbon\Carbon::parse($reserva->data_reserva)->format('d') }}
                                     </h2>
                                     <span class="text-muted text-uppercase small fw-bold">
@@ -67,46 +68,58 @@
                                 </div>
                                 
                                 <div class="col-md-3 text-md-end">
-                                    @if($reserva->status === 'confirmado')
-                                        <span class="badge bg-success text-white px-3 py-2 rounded-pill fw-semibold d-inline-block mb-2 w-100">
-                                            <i class="bi bi-check-circle me-1"></i> Confirmado
-                                        </span>
-                                        
-                                        <button type="button" class="btn btn-sm btn-outline-danger w-100 py-2 fw-bold rounded-pill mt-1" data-bs-toggle="modal" data-bs-target="#modalCancelar{{ $reserva->id }}">
-                                            Cancelar Jogo
-                                        </button>
+                                    @switch($statusCalc)
+                                        @case('cancelado')
+                                            <span class="badge bg-danger text-white px-3 py-2 rounded-pill fw-semibold d-inline-block mb-3 w-100">
+                                                <i class="bi bi-x-circle me-1"></i> Cancelado
+                                            </span>
+                                            @break
+                                        @case('em_jogo')
+                                            <span class="badge bg-success text-white px-3 py-2 rounded-pill fw-semibold d-inline-block mb-2 w-100">
+                                                <i class="bi bi-controller me-1"></i> Em Jogo
+                                            </span>
+                                            @break
+                                        @case('finalizado')
+                                            <span class="badge bg-secondary text-white px-3 py-2 rounded-pill fw-semibold d-inline-block mb-2 w-100">
+                                                <i class="bi bi-check2-all me-1"></i> Finalizado
+                                            </span>
+                                            @break
+                                        @default
+                                            <span class="badge bg-success text-white px-3 py-2 rounded-pill fw-semibold d-inline-block mb-2 w-100">
+                                                <i class="bi bi-hourglass-split me-1"></i> A Iniciar
+                                            </span>
 
-                                        <div class="modal fade" id="modalCancelar{{ $reserva->id }}" tabindex="-1" aria-labelledby="modalCancelarLabel{{ $reserva->id }}" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content border-0 shadow-lg rounded-4 text-center p-3">
-                                                    <div class="modal-header border-0 pb-0 justify-content-end">
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body pb-4">
-                                                        <i class="bi bi-exclamation-circle text-danger display-1 mb-3 d-block"></i>
-                                                        <h4 class="fw-bold mb-3">Cancelar Reserva?</h4>
-                                                        <p class="text-muted mb-1">Tem certeza que deseja cancelar o jogo na <strong>{{ $reserva->arena->nome ?? 'Quadra' }}</strong>?</p>
-                                                        <p class="text-muted mb-4">O horário de <strong>{{ $reserva->horario }}</strong> será liberado imediatamente.</p>
-                                                        
-                                                        <div class="d-flex gap-2">
-                                                            <button type="button" class="btn btn-light fw-bold rounded-pill w-50 py-2" data-bs-dismiss="modal">Não, voltar</button>
-                                                            
-                                                            <form action="/reservas/{{ $reserva->id }}/cancelar" method="POST" class="w-50">
-                                                                @csrf
-                                                                <button type="submit" class="btn btn-danger fw-bold rounded-pill w-100 py-2">
-                                                                    Sim, cancelar
-                                                                </button>
-                                                            </form>
+                                            <button type="button" class="btn btn-sm btn-outline-danger w-100 py-2 fw-bold rounded-pill mt-1" data-bs-toggle="modal" data-bs-target="#modalCancelar{{ $reserva->id }}">
+                                                Cancelar Jogo
+                                            </button>
+
+                                            <div class="modal fade" id="modalCancelar{{ $reserva->id }}" tabindex="-1" aria-labelledby="modalCancelarLabel{{ $reserva->id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content border-0 shadow-lg rounded-4 text-center p-3">
+                                                        <div class="modal-header border-0 pb-0 justify-content-end">
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body pb-4">
+                                                            <i class="bi bi-exclamation-circle text-danger display-1 mb-3 d-block"></i>
+                                                            <h4 class="fw-bold mb-3">Cancelar Reserva?</h4>
+                                                            <p class="text-muted mb-1">Tem certeza que deseja cancelar o jogo na <strong>{{ $reserva->arena->nome ?? 'Quadra' }}</strong>?</p>
+                                                            <p class="text-muted mb-4">O horário de <strong>{{ $reserva->horario }}</strong> será liberado imediatamente.</p>
+
+                                                            <div class="d-flex gap-2">
+                                                                <button type="button" class="btn btn-light fw-bold rounded-pill w-50 py-2" data-bs-dismiss="modal">Não, voltar</button>
+
+                                                                <form action="/reservas/{{ $reserva->id }}/cancelar" method="POST" class="w-50">
+                                                                    @csrf
+                                                                    <button type="submit" class="btn btn-danger fw-bold rounded-pill w-100 py-2">
+                                                                        Sim, cancelar
+                                                                    </button>
+                                                                </form>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    @else
-                                        <span class="badge bg-danger text-white px-3 py-2 rounded-pill fw-semibold d-inline-block mb-3 w-100">
-                                            <i class="bi bi-x-circle me-1"></i> Cancelado
-                                        </span>
-                                    @endif
+                                    @endswitch
                                 </div>
                             </div>
                         </div>
@@ -138,7 +151,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-3 text-md-end">
-                                    @if($reserva->status === 'cancelado')
+                                    @if($reserva->status_calculado === 'cancelado')
                                         <span class="text-danger fw-bold d-block mb-2"><i class="bi bi-x-circle me-1"></i> Cancelado</span>
                                     @else
                                         <span class="text-muted fw-bold d-block mb-2"><i class="bi bi-check2-all me-1"></i> Finalizado</span>

@@ -45,15 +45,15 @@ class FinanceiroController extends Controller
 
         // 4. Matemática do Faturamento (Pix, Local Recebido, Local Pendente)
         $faturamentoTotal = $reservasMes->sum('valor_total');
-        
+
         $recebidoPix = $reservasMes->where('metodo_pagamento', 'pix')->sum('valor_total');
-        
+
         $recebidoLocal = $reservasMes->where('metodo_pagamento', 'local')
-                                     ->where('status', 'finalizado')
+                                     ->where('pago', true)
                                      ->sum('valor_total');
-        
+
         $pendenteLocal = $reservasMes->where('metodo_pagamento', 'local')
-                                     ->where('status', 'confirmado')
+                                     ->where('pago', false)
                                      ->sum('valor_total');
 
         // 5. Envia tudo mastigado para a tela nova

@@ -106,11 +106,10 @@
                                 @endif
                             </td>
                             <td class="pe-4">
-                                @if($reserva->status === 'finalizado')
-                                    <span class="badge bg-primary rounded-pill px-3">Finalizado</span>
-                                @else
-                                    <span class="badge bg-secondary rounded-pill px-3">{{ ucfirst($reserva->status) }}</span>
-                                @endif
+                                @php $statusCalc = $reserva->status_calculado; @endphp
+                                <span class="badge rounded-pill px-3 {{ $statusCalc === 'finalizado' ? 'bg-primary' : ($statusCalc === 'em_jogo' ? 'bg-success' : 'bg-secondary') }}">
+                                    {{ $reserva->status_label }}
+                                </span>
                             </td>
                         </tr>
                     @empty

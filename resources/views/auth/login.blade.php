@@ -48,10 +48,13 @@
             </button>
             
             <div class="text-center mt-4">
-                <p class="text-muted small mb-1">Não tem uma conta? <a href="/cadastro" class="text-success fw-bold text-decoration-none">Criar conta</a></p>
-                <p class="text-muted small mb-0">É proprietário ou funcionário? <a href="/login/administrativo" class="text-dark fw-bold text-decoration-none">Acesse por aqui</a></p>
+                <p class="text-muted small mb-3">Não tem uma conta? <a href="/cadastro" class="text-success fw-bold text-decoration-none">Criar conta</a></p>
             </div>
         </form>
+
+        <a href="/login/administrativo" class="btn btn-outline-dark w-100 py-2 fw-bold rounded-pill mt-2">
+            <i class="bi bi-building me-1"></i> Sou proprietário ou funcionário
+        </a>
 
     </div>
 </div>

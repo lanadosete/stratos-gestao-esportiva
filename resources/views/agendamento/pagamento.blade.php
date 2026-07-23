@@ -288,16 +288,22 @@
 @endphp
 
 @if ($reservaConfirmada)
+@php
+    $ehPix = $reservaConfirmada->metodo_pagamento === 'pix';
+@endphp
 <!-- Modal de confirmação -->
 <div class="modal fade" id="modalConfirmacao" tabindex="-1" aria-labelledby="modalConfirmacaoLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 text-center p-3">
             <div class="modal-body p-4">
                 <i class="bi bi-check-circle-fill text-success display-1 mb-3 d-block"></i>
-                <h4 class="fw-bold mb-2" id="modalConfirmacaoLabel">Pagamento confirmado!</h4>
+                <h4 class="fw-bold mb-2" id="modalConfirmacaoLabel">
+                    {{ $ehPix ? 'Horário marcado e pagamento realizado!' : 'Horário confirmado!' }}
+                </h4>
                 <p class="text-muted mb-1">
                     A reserva {{ $reservaConfirmada->reservado_para ? 'para ' . $reservaConfirmada->reservado_para : 'na sua conta' }}
-                    na <strong>{{ $reservaConfirmada->arena->nome ?? 'quadra' }}</strong> foi confirmada com sucesso.
+                    na <strong>{{ $reservaConfirmada->arena->nome ?? 'quadra' }}</strong>
+                    {{ $ehPix ? 'foi confirmada e o pagamento via Pix foi realizado com sucesso.' : 'foi confirmada. O pagamento deverá ser feito na recepção do complexo.' }}
                 </p>
                 <p class="text-muted mb-4">
                     {{ \Carbon\Carbon::parse($reservaConfirmada->data_reserva)->format('d/m/Y') }} às {{ $reservaConfirmada->horario }}

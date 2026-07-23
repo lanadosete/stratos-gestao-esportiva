@@ -70,6 +70,15 @@ class ReservaController extends Controller
             }
         }
 
+        // Não permite reservar horário que já passou no dia de hoje
+        if ($dataReserva->isToday()) {
+            foreach ($horariosSelecionados as $hora) {
+                if ((int) substr($hora, 0, 2) <= Carbon::now()->hour) {
+                    return back()->withErrors(['horario' => "O horário {$hora} já passou."]);
+                }
+            }
+        }
+
         // 2. Loop para validar conflitos e CALCULAR O PREÇO NO SERVIDOR
         foreach ($horariosSelecionados as $hora) {
             
@@ -99,6 +108,9 @@ $turno = $this->detectarTurno($hora);
         }
 
         // 3. Salvando a reserva
+        // O horário é considerado confirmado assim que a reserva é criada (independente
+        // do pagamento). Pix é debitado na hora, então já nasce marcado como pago;
+        // pagamento local só é marcado como pago quando a recepção confirma o recebimento.
         $reserva = Reserva::create([
             'user_id' => $usuarioReserva,
             'reservado_para' => $reservadoPara,
@@ -108,6 +120,7 @@ $turno = $this->detectarTurno($hora);
             'valor_total' => $totalCalculado, // Valor real calculado no servidor
             'metodo_pagamento' => $request->metodo_pagamento,
             'status' => 'confirmado',
+            'pago' => $request->metodo_pagamento === 'pix',
         ]);
 
         return redirect('/agendamento/pagamento?' . http_build_query([
@@ -136,6 +149,13 @@ $turno = $this->detectarTurno($hora);
     public function cancelar($id)
     {
         $reserva = Reserva::findOrFail($id);
+        $usuario = Auth::user();
+
+        // Cliente só cancela a própria reserva; admin e funcionário podem cancelar qualquer uma.
+        if ($usuario->tipo_conta === 'cliente' && $reserva->user_id !== $usuario->id) {
+            abort(403);
+        }
+
         $reserva->update(['status' => 'cancelado']);
         return back()->with('success', 'Reserva cancelada com sucesso!');
     }

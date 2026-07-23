@@ -27,6 +27,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/login/administrativo', function () { return view('auth.login-admin'); });
     Route::post('/cadastro', [AuthController::class, 'registrar']);
     Route::post('/login', [AuthController::class, 'entrar']);
+    Route::post('/login/administrativo', [AuthController::class, 'entrarStaff']);
 });
 
 // ==========================================
@@ -112,10 +113,17 @@ Route::middleware('auth')->group(function () {
                 })
                 ->toArray();
 
+            $ehHoje = $dataReserva->isToday();
+            $horaAtual = Carbon::now()->hour;
+
             $horarios = [];
             for ($h = $abertura; $h < $fechamento; $h++) {
                 $hora = str_pad($h, 2, '0', STR_PAD_LEFT) . ':00';
-                $horarios[] = ['hora' => $hora, 'ocupado' => in_array($hora, $ocupados)];
+                $horarios[] = [
+                    'hora' => $hora,
+                    'ocupado' => in_array($hora, $ocupados),
+                    'passado' => $ehHoje && $h <= $horaAtual,
+                ];
             }
 
             return response()->json(['aberto' => true, 'horarios' => $horarios]);
@@ -167,21 +175,21 @@ Route::middleware('auth')->group(function () {
 
     // 3. PAINEL DA RECEPÇÃO
     Route::prefix('recepcao')->group(function () {
-        Route::get('/', function () { 
+        Route::get('/', function () {
             if (!in_array(Auth::user()->tipo_conta, ['admin', 'funcionario'])) return redirect('/');
-            
+
             $jogosHoje = Reserva::with(['arena', 'user'])
                 ->whereDate('data_reserva', Carbon::today())
-                ->where('status', '!=', 'cancelado')
                 ->orderBy('horario', 'asc')
                 ->get();
 
-            return view('recepcao.painel', compact('jogosHoje')); 
+            return view('recepcao.painel', compact('jogosHoje'));
         });
 
-        Route::post('/reservas/{id}/finalizar', function($id) {
-            Reserva::findOrFail($id)->update(['status' => 'finalizado']);
-            return back()->with('success', 'Pagamento confirmado e jogo liberado!');
+        // Marca o pagamento como recebido — não mexe no status do horário (que é calculado por tempo).
+        Route::post('/reservas/{id}/pagamento', function($id) {
+            Reserva::findOrFail($id)->update(['pago' => true]);
+            return back()->with('success', 'Pagamento confirmado!');
         });
     });
 

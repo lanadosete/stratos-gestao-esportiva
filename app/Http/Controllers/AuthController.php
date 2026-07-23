@@ -42,34 +42,62 @@ class AuthController extends Controller
         return redirect('/');
     }
 
-    // Função para fazer o Login
+    // Login da área principal — exclusivo para clientes (jogadores)
     public function entrar(Request $request)
+    {
+        return $this->autenticar(
+            $request,
+            ['cliente'],
+            'Esta área é exclusiva para jogadores. Proprietários e funcionários devem entrar pelo botão "Sou proprietário ou funcionário".'
+        );
+    }
+
+    // Login administrativo — exclusivo para donos de complexo (admin) e funcionários
+    public function entrarStaff(Request $request)
+    {
+        return $this->autenticar(
+            $request,
+            ['admin', 'funcionario'],
+            'Esta área é exclusiva para proprietários e funcionários. Jogadores devem acessar pela área principal.'
+        );
+    }
+
+    private function autenticar(Request $request, array $tiposPermitidos, string $mensagemAreaErrada)
     {
         $credenciais = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($credenciais)) {
-            $request->session()->regenerate();
-            
-            // Direciona o dono para o painel e o jogador para a home
-            if (Auth::user()->tipo_conta === 'admin') {
-                return redirect('/admin/dashboard');
-            }
-            if (Auth::user()->tipo_conta === 'funcionario') {
-                return redirect('/recepcao');
-            }
-
-            $redirect = $request->input('redirect');
-            if ($redirect && str_starts_with($redirect, '/')) {
-                return redirect($redirect);
-            }
-
-            return redirect('/');
+        if (!Auth::attempt($credenciais)) {
+            return back()->withErrors(['email' => 'E-mail ou senha incorretos.']);
         }
 
-        return back()->withErrors(['email' => 'E-mail ou senha incorretos.']);
+        // Login válido, mas na área errada: desfaz a sessão e barra o acesso
+        if (!in_array(Auth::user()->tipo_conta, $tiposPermitidos)) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors(['email' => $mensagemAreaErrada]);
+        }
+
+        $request->session()->regenerate();
+
+        // Direciona o dono para o painel e o funcionário para a recepção
+        if (Auth::user()->tipo_conta === 'admin') {
+            return redirect('/admin/dashboard');
+        }
+        if (Auth::user()->tipo_conta === 'funcionario') {
+            return redirect('/recepcao');
+        }
+
+        $redirect = $request->input('redirect');
+        if ($redirect && str_starts_with($redirect, '/')) {
+            return redirect($redirect);
+        }
+
+        return redirect('/');
     }
 
     // Função para Sair (Logout)

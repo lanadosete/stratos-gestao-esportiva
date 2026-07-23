@@ -20,7 +20,7 @@
             </div>
         @endif
 
-        <form action="/login" method="POST">
+        <form action="/login/administrativo" method="POST">
             @csrf
 
             <div class="mb-3">

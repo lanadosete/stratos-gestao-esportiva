@@ -3,9 +3,10 @@
 @section('conteudo')
 @php
     // O Laravel faz os cálculos matemáticos para preencher os seus cartões do topo!
-    $totalReservas = $jogosHoje->count();
-    $pagamentosPendentes = $jogosHoje->where('status', 'confirmado')->where('metodo_pagamento', 'local')->count();
-    $checkinsRealizados = $jogosHoje->where('status', 'finalizado')->count();
+    $jogosAtivosHoje = $jogosHoje->where('status', '!=', 'cancelado');
+    $totalReservas = $jogosAtivosHoje->count();
+    $pagamentosPendentes = $jogosAtivosHoje->where('pago', false)->where('metodo_pagamento', 'local')->count();
+    $pagamentosConfirmados = $jogosAtivosHoje->where('pago', true)->count();
 @endphp
 
 <div class="bg-gradient-stratos" style="min-height: 100vh;">
@@ -72,8 +73,8 @@
             <div class="card card-stratos p-3 border-0 shadow-sm border-start border-primary border-4 h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <small class="text-muted text-uppercase fw-bold">Check-ins Realizados</small>
-                        <h3 class="mb-0 fw-bold text-dark mt-1">{{ $checkinsRealizados }}</h3>
+                        <small class="text-muted text-uppercase fw-bold">Pagamentos Confirmados</small>
+                        <h3 class="mb-0 fw-bold text-dark mt-1">{{ $pagamentosConfirmados }}</h3>
                     </div>
                     <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
                         <i class="bi bi-person-check fs-4 text-primary"></i>
@@ -95,17 +96,19 @@
                 <thead class="text-muted small text-uppercase">
                     <tr>
                         <th style="width: 10%;">Horário</th>
-                        <th style="width: 25%;">Cliente</th>
-                        <th style="width: 25%;">Quadra / Esporte</th>
-                        <th style="width: 15%;">Pagamento</th>
-                        <th class="text-end" style="width: 25%;">Ações (Check-in)</th>
+                        <th style="width: 20%;">Cliente</th>
+                        <th style="width: 20%;">Quadra / Esporte</th>
+                        <th style="width: 12%;">Status</th>
+                        <th style="width: 13%;">Pagamento</th>
+                        <th class="text-end" style="width: 25%;">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($jogosHoje as $jogo)
-                        <!-- Se já fez check-in, a linha inteira fica mais apagada (opacity-50) -->
-                        <tr class="{{ $jogo->status === 'finalizado' ? 'opacity-50' : '' }}">
-                            <td><h5 class="mb-0 fw-bold {{ $jogo->status === 'finalizado' ? 'text-muted' : 'text-dark' }}">{{ $jogo->horario }}</h5></td>
+                        @php $statusCalc = $jogo->status_calculado; @endphp
+                        <!-- Jogos finalizados ou cancelados ficam mais apagados na lista -->
+                        <tr class="{{ in_array($statusCalc, ['finalizado', 'cancelado']) ? 'opacity-50' : '' }}">
+                            <td><h5 class="mb-0 fw-bold {{ $statusCalc === 'finalizado' ? 'text-muted' : 'text-dark' }}">{{ $jogo->horario }}</h5></td>
                             <td>
                                 @php $nomeExibido = $jogo->reservado_para ?: ($jogo->user->name ?? 'Cliente'); @endphp
                                 <div class="d-flex align-items-center">
@@ -114,7 +117,7 @@
                                         {{ strtoupper(substr($nomeExibido, 0, 1)) }}
                                     </div>
                                     <div>
-                                        <span class="fw-semibold d-block {{ $jogo->status === 'finalizado' ? 'text-muted' : 'text-dark' }}">{{ $nomeExibido }}</span>
+                                        <span class="fw-semibold d-block {{ $statusCalc === 'finalizado' ? 'text-muted' : 'text-dark' }}">{{ $nomeExibido }}</span>
                                         @if($jogo->reservado_para)
                                             <small class="text-muted">Reservado por {{ $jogo->user->name ?? 'funcionário' }}</small>
                                         @endif
@@ -122,19 +125,41 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="d-block fw-bold {{ $jogo->status === 'finalizado' ? 'text-muted' : 'text-dark' }}">{{ $jogo->arena->nome ?? 'Quadra' }}</span>
+                                <span class="d-block fw-bold {{ $statusCalc === 'finalizado' ? 'text-muted' : 'text-dark' }}">{{ $jogo->arena->nome ?? 'Quadra' }}</span>
                                 <small class="text-muted">{{ $jogo->arena->tipo_esporte ?? 'Esporte' }}</small>
                             </td>
-                            
-                            <!-- Regras de Exibição do Pagamento -->
+
+                            <!-- Status do horário (calculado por tempo, independente de pagamento) -->
                             <td>
-                                @if($jogo->status === 'finalizado')
+                                @switch($statusCalc)
+                                    @case('cancelado')
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border-0 px-2 py-1">
+                                            <i class="bi bi-x-circle me-1"></i> Cancelado
+                                        </span>
+                                        @break
+                                    @case('a_iniciar')
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border-0 px-2 py-1">
+                                            <i class="bi bi-hourglass-split me-1"></i> A Iniciar
+                                        </span>
+                                        @break
+                                    @case('em_jogo')
+                                        <span class="badge bg-success bg-opacity-10 text-success border-0 px-2 py-1">
+                                            <i class="bi bi-controller me-1"></i> Em Jogo
+                                        </span>
+                                        @break
+                                    @case('finalizado')
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 px-2 py-1">
+                                            <i class="bi bi-check2-all me-1"></i> Finalizado
+                                        </span>
+                                        @break
+                                @endswitch
+                            </td>
+
+                            <!-- Pagamento: apenas indica se foi recebido, não interfere no status do horário -->
+                            <td>
+                                @if($jogo->pago)
                                     <span class="badge bg-success bg-opacity-10 text-success border-0 px-2 py-1">
                                         <i class="bi bi-check-circle me-1"></i> Pago
-                                    </span>
-                                @elseif($jogo->metodo_pagamento === 'pix')
-                                    <span class="badge bg-success bg-opacity-10 text-success border-0 px-2 py-1">
-                                        <i class="bi bi-lightning-charge-fill me-1"></i> Pix Pago
                                     </span>
                                 @else
                                     <span class="badge bg-warning bg-opacity-10 text-warning border-0 px-2 py-1">
@@ -142,30 +167,35 @@
                                     </span>
                                 @endif
                             </td>
-                            
-                            <!-- Regras do Botão de Ação -->
+
+                            <!-- Ações: confirmar pagamento (se pendente) e cancelar (admin/funcionário) -->
                             <td class="text-end">
-                                @if($jogo->status === 'finalizado')
-                                    <span class="text-muted fw-bold small"><i class="bi bi-check2-all me-1"></i> Em Jogo</span>
-                                @else
-                                    <form action="/recepcao/reservas/{{ $jogo->id }}/finalizar" method="POST" class="m-0">
-                                        @csrf
-                                        @if($jogo->metodo_pagamento === 'pix')
-                                            <button type="submit" class="btn btn-sm btn-verde rounded-pill px-3 fw-bold shadow-sm">
-                                                Liberar Entrada <i class="bi bi-door-open ms-1"></i>
-                                            </button>
-                                        @else
-                                            <button type="submit" class="btn btn-sm btn-warning text-dark rounded-pill px-3 fw-bold shadow-sm">
-                                                Receber e Liberar <i class="bi bi-cash-coin ms-1"></i>
-                                            </button>
+                                @if($statusCalc !== 'cancelado')
+                                    <div class="d-flex gap-2 justify-content-end flex-wrap">
+                                        @if(!$jogo->pago)
+                                            <form action="/recepcao/reservas/{{ $jogo->id }}/pagamento" method="POST" class="m-0">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-warning text-dark rounded-pill px-3 fw-bold shadow-sm">
+                                                    Confirmar Pagamento <i class="bi bi-cash-coin ms-1"></i>
+                                                </button>
+                                            </form>
                                         @endif
-                                    </form>
+
+                                        @if(in_array($statusCalc, ['a_iniciar', 'em_jogo']))
+                                            <form action="/reservas/{{ $jogo->id }}/cancelar" method="POST" class="m-0" onsubmit="return confirm('Tem certeza que deseja cancelar esta reserva?');">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold">
+                                                    Cancelar
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">
+                            <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="bi bi-calendar-x display-4 d-block mb-3 opacity-25"></i>
                                 <h5 class="fw-bold">Nenhuma reserva para hoje</h5>
                                 <p class="mb-0">A agenda do dia está livre no momento.</p>
