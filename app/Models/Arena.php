@@ -5,29 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Arena extends Model
+class Complexo extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'complexo_id',
-        'nome',
-        'tipo_esporte', // Ex: Vôlei, Beach Tennis
-    ];
+    protected $fillable = ['user_id', 'nome', 'endereco', 'telefone'];
 
-    // Relacionamento com o Complexo
-    public function complexo()
+    // Um Complexo tem muitas Arenas (quadras)
+    public function arenas()
     {
-        return $this->belongsTo(Complexo::class);
+        return $this->hasMany(Arena::class);
     }
 
-    public function esportes()
+    public function funcionamento()
     {
-        return $this->hasMany(ArenaEsporte::class);
-    }
-
-    public function precosTurno()
-    {
-        return $this->hasMany(ArenaPrecoTurno::class);
+        return $this->hasMany(ComplexoFuncionamento::class);
     }
 }
