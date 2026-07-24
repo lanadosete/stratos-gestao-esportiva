@@ -4,17 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ArenaPrecoTurno extends Model
+class QuadraPrecoTurno extends Model
 {
     protected $fillable = [
-        'arena_id',
+        'quadra_id',
         'esporte',
         'turno',
         'valor_hora',
     ];
 
-    public function arena()
+    public function quadra()
     {
-        return $this->belongsTo(Arena::class);
+        return $this->belongsTo(Quadra::class);
     }
 }

@@ -2,30 +2,30 @@
 
 namespace Tests\Feature;
 
-use App\Models\Complexo;
+use App\Models\Arena;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-class ComplexoEdicaoTest extends TestCase
+class ArenaEdicaoTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_open_complexo_edit_screen_even_if_functioning_table_is_missing(): void
+    public function test_admin_can_open_arena_edit_screen_even_if_functioning_table_is_missing(): void
     {
         $user = User::factory()->create(['tipo_conta' => 'admin']);
-        $complexo = Complexo::create([
+        $arena = Arena::create([
             'user_id' => $user->id,
-            'nome' => 'Complexo Antigo',
+            'nome' => 'Arena Antiga',
             'endereco' => 'Rua Antiga',
             'telefone' => '1111',
         ]);
 
-        Schema::dropIfExists('complexo_funcionamentos');
+        Schema::dropIfExists('arena_funcionamentos');
 
         $this->actingAs($user)
-            ->get('/admin/complexo/' . $complexo->id . '/editar')
+            ->get('/admin/arena/' . $arena->id . '/editar')
             ->assertOk();
     }
 
@@ -34,8 +34,8 @@ class ComplexoEdicaoTest extends TestCase
         $user = User::factory()->create(['tipo_conta' => 'admin']);
 
         $this->actingAs($user)
-            ->post('/admin/complexo/salvar', [
-                'nome' => 'Complexo Novo',
+            ->post('/admin/arena/salvar', [
+                'nome' => 'Arena Nova',
                 'endereco' => 'Rua Nova',
                 'telefone' => '(11) 99999-9999',
                 'dias_semana' => ['1', '2'],
@@ -44,17 +44,17 @@ class ComplexoEdicaoTest extends TestCase
             ])
             ->assertRedirect('/admin/dashboard');
 
-        $complexo = Complexo::where('user_id', $user->id)->latest('id')->first();
+        $arena = Arena::where('user_id', $user->id)->latest('id')->first();
 
-        $this->assertDatabaseHas('complexo_funcionamentos', [
-            'complexo_id' => $complexo->id,
+        $this->assertDatabaseHas('arena_funcionamentos', [
+            'arena_id' => $arena->id,
             'dia_semana' => 1,
             'hora_abertura' => '08:00:00',
             'hora_fechamento' => '20:00:00',
         ]);
 
-        $this->assertDatabaseHas('complexo_funcionamentos', [
-            'complexo_id' => $complexo->id,
+        $this->assertDatabaseHas('arena_funcionamentos', [
+            'arena_id' => $arena->id,
             'dia_semana' => 2,
             'hora_abertura' => '08:00:00',
             'hora_fechamento' => '20:00:00',
@@ -66,8 +66,8 @@ class ComplexoEdicaoTest extends TestCase
         $user = User::factory()->create(['tipo_conta' => 'admin']);
 
         $this->actingAs($user)
-            ->post('/admin/complexo/salvar', [
-                'nome' => 'Complexo Novo',
+            ->post('/admin/arena/salvar', [
+                'nome' => 'Arena Nova',
                 'endereco' => 'Rua Nova',
                 'telefone' => '(11) 99999-9999',
             ])
@@ -79,7 +79,7 @@ class ComplexoEdicaoTest extends TestCase
         $user = User::factory()->create(['tipo_conta' => 'admin']);
 
         $this->actingAs($user)
-            ->post('/admin/complexo/salvar', [
+            ->post('/admin/arena/salvar', [
                 'nome' => '',
                 'endereco' => '',
                 'telefone' => '(11) 99999-9999',
@@ -90,19 +90,19 @@ class ComplexoEdicaoTest extends TestCase
             ->assertSessionHasErrors(['nome', 'endereco']);
     }
 
-    public function test_admin_can_update_complexo_data(): void
+    public function test_admin_can_update_arena_data(): void
     {
         $user = User::factory()->create(['tipo_conta' => 'admin']);
-        $complexo = Complexo::create([
+        $arena = Arena::create([
             'user_id' => $user->id,
-            'nome' => 'Complexo Antigo',
+            'nome' => 'Arena Antiga',
             'endereco' => 'Rua Antiga',
             'telefone' => '1111',
         ]);
 
         $this->actingAs($user)
-            ->post('/admin/complexo/' . $complexo->id . '/atualizar', [
-                'nome' => 'Complexo Novo',
+            ->post('/admin/arena/' . $arena->id . '/atualizar', [
+                'nome' => 'Arena Nova',
                 'endereco' => 'Rua Nova',
                 'telefone' => '(11) 99999-9999',
                 'dias_semana' => ['1'],
@@ -111,9 +111,9 @@ class ComplexoEdicaoTest extends TestCase
             ])
             ->assertRedirect('/admin/dashboard');
 
-        $this->assertDatabaseHas('complexos', [
-            'id' => $complexo->id,
-            'nome' => 'Complexo Novo',
+        $this->assertDatabaseHas('arenas', [
+            'id' => $arena->id,
+            'nome' => 'Arena Nova',
             'endereco' => 'Rua Nova',
             'telefone' => '(11) 99999-9999',
         ]);

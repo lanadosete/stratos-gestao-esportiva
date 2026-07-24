@@ -6,16 +6,16 @@
 
         <!-- Botão de Voltar -->
         <div class="mb-4">
-            <a href="/admin/arenas" class="text-decoration-none text-muted fw-semibold">
-                <i class="bi bi-arrow-left me-1"></i> Voltar para Minhas Arenas
+            <a href="/admin/quadras" class="text-decoration-none text-muted fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i> Voltar para Minhas Quadras
             </a>
         </div>
 
         <div class="card card-stratos p-5 shadow-sm border-0">
 
             <div class="mb-4">
-                <h4 class="text-success fw-bold mb-1">Adicionar Nova Arena</h4>
-                <p class="text-muted">Cadastre as informações da arena para disponibilizar aos seus clientes.</p>
+                <h4 class="text-success fw-bold mb-1">Adicionar Nova Quadra</h4>
+                <p class="text-muted">Cadastre as informações da quadra para disponibilizar aos seus clientes.</p>
             </div>
 
             <!-- Exibição de Erros de Validação -->
@@ -29,7 +29,7 @@
                 </div>
             @endif
 
-            <form action="/admin/arenas/salvar" method="POST">
+            <form action="/admin/quadras/salvar" method="POST">
                 <script>
                     document.addEventListener('DOMContentLoaded', function () {
                         document.querySelectorAll('.esporte-checkbox').forEach(function (checkbox) {
@@ -50,12 +50,12 @@
                 @csrf
 
                 <div class="mb-3">
-                    <label class="form-label small fw-bold text-muted text-uppercase">Nome / Identificação da Arena</label>
-                    <input type="text" name="nome" class="form-control form-control-lg bg-light border-0 shadow-sm" placeholder="Ex: Arena 1 - Areia" required>
+                    <label class="form-label small fw-bold text-muted text-uppercase">Nome / Identificação da Quadra</label>
+                    <input type="text" name="nome" class="form-control form-control-lg bg-light border-0 shadow-sm" placeholder="Ex: Quadra 1 - Areia" required>
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label small fw-bold text-muted text-uppercase">Esportes que funcionarão na arena</label>
+                    <label class="form-label small fw-bold text-muted text-uppercase">Esportes que funcionarão na quadra <span class="text-danger">*</span></label>
                     <div class="border rounded-3 p-3 bg-light">
                         @php $esportesFixos = ['Beach Vôlei', 'Beach Tênis', 'Futevôlei']; @endphp
                         @foreach($esportesFixos as $esporte)
@@ -85,11 +85,14 @@
                             </div>
                         @endforeach
                     </div>
+                    @error('esportes')
+                        <div class="text-danger small mt-2"><i class="bi bi-exclamation-circle me-1"></i>{{ $message }}</div>
+                    @enderror
                     <div class="form-text text-muted small mt-2"><i class="bi bi-info-circle me-1"></i> Marque os esportes que irão funcionar e defina o preço por turno para cada um.</div>
                 </div>
 
                 <button type="submit" class="btn btn-verde w-100 py-3 fw-bold rounded-pill shadow-sm mt-3">
-                    <i class="bi bi-check2-circle me-2"></i> Salvar Nova Arena
+                    <i class="bi bi-check2-circle me-2"></i> Salvar Nova Quadra
                 </button>
             </form>
 

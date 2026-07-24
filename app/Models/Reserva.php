@@ -14,7 +14,8 @@ class Reserva extends Model
     protected $fillable = [
         'user_id',
         'reservado_para',
-        'arena_id',
+        'quadra_id',
+        'esporte',
         'data_reserva',
         'horario',
         'valor_total',
@@ -36,10 +37,10 @@ class Reserva extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Relação: Uma reserva pertence a uma arena (quadra reservada)
-    public function arena()
+    // Relação: Uma reserva pertence a uma quadra
+    public function quadra()
     {
-        return $this->belongsTo(Arena::class);
+        return $this->belongsTo(Quadra::class);
     }
 
     /**
@@ -92,5 +93,50 @@ class Reserva extends Model
             'em_jogo' => 'Em Jogo',
             'finalizado' => 'Finalizado',
         };
+    }
+
+    /**
+     * Link do wa.me para contatar o cliente, ou null se a reserva não tiver um
+     * cliente cadastrado de fato (reserva anotada pela recepção sem cadastro,
+     * onde user_id é do funcionário/admin) ou o cliente não tiver telefone.
+     */
+    public function getWhatsappLinkAttribute(): ?string
+    {
+        if ($this->reservado_para || !$this->user || $this->user->tipo_conta !== 'cliente') {
+            return null;
+        }
+
+        return static::linkWhatsapp($this->user->telefone);
+    }
+
+    /**
+     * Link do wa.me para o cliente contatar a arena sobre a reserva, ou null se
+     * a quadra/arena não existir mais ou a arena não tiver telefone cadastrado.
+     */
+    public function getArenaWhatsappLinkAttribute(): ?string
+    {
+        return static::linkWhatsapp($this->quadra?->arena?->telefone);
+    }
+
+    // Normaliza um telefone cru pro formato exigido pelo wa.me (código do país +
+    // DDD + número, só dígitos), ou null se não der pra formar um número válido.
+    private static function linkWhatsapp(?string $telefone): ?string
+    {
+        if (!$telefone) {
+            return null;
+        }
+
+        $digitos = preg_replace('/\D/', '', $telefone);
+
+        if (strlen($digitos) < 10) {
+            return null;
+        }
+
+        // DDD + número sem código do país (10 ou 11 dígitos) recebem o 55 na frente
+        if (strlen($digitos) <= 11) {
+            $digitos = '55' . $digitos;
+        }
+
+        return 'https://wa.me/' . $digitos;
     }
 }

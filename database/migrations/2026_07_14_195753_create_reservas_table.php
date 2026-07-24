@@ -9,7 +9,7 @@ return new class extends Migration {
         Schema::create('reservas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('arena_id')->constrained('arenas')->onDelete('cascade');
+            $table->foreignId('quadra_id')->constrained('quadras')->onDelete('cascade');
             $table->date('data_reserva');
             $table->string('horario');
             $table->decimal('valor_total', 8, 2);

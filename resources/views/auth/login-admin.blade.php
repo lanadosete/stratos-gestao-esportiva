@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('conteudo')
-<div class="container-fluid p-0 d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+<div class="container-fluid p-0 d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 61px);">
     <div class="card card-stratos p-5 shadow-sm border-0" style="width: 100%; max-width: 450px;">
 
         <div class="text-center mb-4">
@@ -45,6 +45,10 @@
             <button type="submit" class="btn btn-dark w-100 py-3 fw-bold rounded-pill shadow-sm">
                 Entrar <i class="bi bi-arrow-right ms-2"></i>
             </button>
+
+            <a href="/cadastro/administrativo" class="btn btn-outline-dark w-100 py-3 fw-bold rounded-pill mt-3">
+                Cadastre-se aqui
+            </a>
 
             <div class="text-center mt-4">
                 <p class="text-muted small mb-1">É um jogador? <a href="/login" class="text-success fw-bold text-decoration-none">Acesse por aqui</a></p>

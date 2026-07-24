@@ -2,10 +2,10 @@
 
 @section('conteudo')
 @php
-    $arenaId = request('arena_id');
-    $arena = \App\Models\Arena::with('complexo')->find($arenaId);
+    $quadraId = request('quadra_id');
+    $quadra = \App\Models\Quadra::with('arena')->find($quadraId);
 
-    if (!$arena) {
+    if (!$quadra) {
         echo "<script>window.location.href = '/agendamento';</script>";
         exit;
     }
@@ -16,7 +16,7 @@
     // horario pode vir como "18:00 | 19:00" (múltiplos horários juntos) — separa em array
     $horariosArray = array_values(array_filter(array_map('trim', explode('|', $horario))));
     // Se o esporte não vier, usamos o tipo_esporte padrão da quadra
-    $esporte = request('esporte') ?? $arena->tipo_esporte;
+    $esporte = request('esporte') ?? $quadra->tipo_esporte;
 
     // Se acabamos de finalizar o pagamento, carregamos a reserva para exibir a modal de confirmação
     // (o id só chega aqui via flash de sessão, criado no mesmo request que gerou a reserva —
@@ -24,7 +24,7 @@
     // exigir que o user_id da reserva seja o do usuário logado)
     $reservaConfirmada = null;
     if (session('reserva_confirmada')) {
-        $reservaConfirmada = \App\Models\Reserva::with('arena.complexo')->find(session('reserva_confirmada'));
+        $reservaConfirmada = \App\Models\Reserva::with('quadra.arena')->find(session('reserva_confirmada'));
     }
 @endphp
 
@@ -34,9 +34,9 @@
         <div class="col-md-10">
 
             <div class="d-flex flex-wrap gap-2 mb-5 mt-3">
-                <a href="/agendamento" class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal text-decoration-none"><i class="bi bi-check2 me-1"></i> 1. Complexo</a>
-                <a href="/agendamento/arenas?complexo_id={{ $arena->complexo_id }}" class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal text-decoration-none"><i class="bi bi-check2 me-1"></i> 2. Quadra</a>
-                <a href="/agendamento/data?arena_id={{ $arena->id }}" class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal text-decoration-none"><i class="bi bi-check2 me-1"></i> 3. Data e Hora</a>
+                <a href="/agendamento" class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal text-decoration-none"><i class="bi bi-check2 me-1"></i> 1. Arena</a>
+                <a href="/agendamento/quadras?arena_id={{ $quadra->arena_id }}" class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal text-decoration-none"><i class="bi bi-check2 me-1"></i> 2. Quadra</a>
+                <a href="/agendamento/data?quadra_id={{ $quadra->id }}" class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal text-decoration-none"><i class="bi bi-check2 me-1"></i> 3. Data e Hora</a>
                 @if ($reservaConfirmada)
                     <span class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal"><i class="bi bi-check2 me-1"></i> 4. Pagamento</span>
                 @else
@@ -64,7 +64,7 @@
                     @else
                     <form action="/agendamento/finalizar" method="POST">
                         @csrf
-                        <input type="hidden" name="arena_id" value="{{ $arena->id }}">
+                        <input type="hidden" name="quadra_id" value="{{ $quadra->id }}">
                         <input type="hidden" name="data_reserva" value="{{ $dataReserva }}">
 
                         <!-- CORREÇÃO 1: Enviar como array para o controller (um input por horário) -->
@@ -127,7 +127,7 @@
                                     <input type="radio" name="pagamento" value="local" class="form-check-input me-3 mt-0 fs-5" onchange="updateButton()">
                                     <div>
                                         <strong class="d-block"><i class="bi bi-shop me-1"></i> Pagar no Local</strong>
-                                        <small class="text-muted">Pague na recepção do complexo.</small>
+                                        <small class="text-muted">Pague na recepção da arena.</small>
                                     </div>
                                 </label>
                             </div>
@@ -143,8 +143,8 @@
                 <div class="col-md-4">
                     <div class="card card-stratos p-4 shadow-sm border-0 rounded-3">
                         <h5 class="mb-3 fw-bold">Resumo da Reserva</h5>
-                        <p class="mb-1 fw-bold fs-5">{{ $arena->nome }}</p>
-                        <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-success me-1"></i> {{ $arena->complexo->nome ?? 'Complexo Stratos' }}</p>
+                        <p class="mb-1 fw-bold fs-5">{{ $quadra->nome }}</p>
+                        <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-success me-1"></i> {{ $quadra->arena->nome ?? 'Arena Stratos' }}</p>
                         <hr class="text-muted">
 
                         <div class="d-flex justify-content-between mb-2">
@@ -302,8 +302,8 @@
                 </h4>
                 <p class="text-muted mb-1">
                     A reserva {{ $reservaConfirmada->reservado_para ? 'para ' . $reservaConfirmada->reservado_para : 'na sua conta' }}
-                    na <strong>{{ $reservaConfirmada->arena->nome ?? 'quadra' }}</strong>
-                    {{ $ehPix ? 'foi confirmada e o pagamento via Pix foi realizado com sucesso.' : 'foi confirmada. O pagamento deverá ser feito na recepção do complexo.' }}
+                    na <strong>{{ $reservaConfirmada->quadra->nome ?? 'quadra' }}</strong>
+                    {{ $ehPix ? 'foi confirmada e o pagamento via Pix foi realizado com sucesso.' : 'foi confirmada. O pagamento deverá ser feito na recepção da arena.' }}
                 </p>
                 <p class="text-muted mb-4">
                     {{ \Carbon\Carbon::parse($reservaConfirmada->data_reserva)->format('d/m/Y') }} às {{ $reservaConfirmada->horario }}

@@ -26,6 +26,12 @@
         .text-success { color: #28a745 !important; }
         .border-success { border-color: #28a745 !important; }
 
+        /* Tom âmbar usado no status "A Iniciar" das reservas (agendamentos do
+           cliente, agenda do admin e recepção) — distinto do amarelo padrão do
+           Bootstrap (.bg-warning), que continua sendo usado em outros contextos. */
+        .bg-amber-soft { background-color: rgba(245, 158, 11, 0.12) !important; }
+        .text-amber { color: #b45309 !important; }
+
         /* Menu sanduíche: só existe em telas bem pequenas (abaixo do breakpoint "sm")
            e flutua por cima do conteúdo em vez de empurrá-lo para baixo. */
         @media (max-width: 575.98px) {
@@ -78,20 +84,23 @@
                         <!-- Botões específicos do Admin -->
                         @if(Auth::user()->tipo_conta === 'admin')
                             <li class="nav-item">
-                                <a class="nav-link fw-semibold text-muted" href="/recepcao"><i class="bi bi-pc-display-horizontal me-1"></i> Recepção</a>
+                                <a class="nav-link {{ request()->is('recepcao*') ? 'fw-bold text-success' : 'fw-semibold text-muted' }}" href="/recepcao"><i class="bi bi-pc-display-horizontal me-1"></i> Recepção</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link fw-semibold text-muted" href="/agendamento"><i class="bi bi-calendar-plus me-1"></i> Nova Reserva</a>
+                                <a class="nav-link {{ request()->is('agendamento*') ? 'fw-bold text-success' : 'fw-semibold text-muted' }}" href="/agendamento"><i class="bi bi-calendar-plus me-1"></i> Nova Reserva</a>
                             </li>
                         @endif
 
                         <!-- Botões específicos do Funcionário -->
                         @if(Auth::user()->tipo_conta === 'funcionario')
                             <li class="nav-item">
-                                <a class="nav-link fw-bold text-success" href="/recepcao"><i class="bi bi-pc-display-horizontal me-1"></i> Painel de Recepção</a>
+                                <a class="nav-link {{ request()->is('recepcao*') ? 'fw-bold text-success' : 'fw-semibold text-muted' }}" href="/recepcao"><i class="bi bi-pc-display-horizontal me-1"></i> Painel de Recepção</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link fw-semibold text-muted" href="/agendamento"><i class="bi bi-calendar-plus me-1"></i> Nova Reserva</a>
+                                <a class="nav-link {{ (request()->is('agenda') || request()->is('agenda/*')) ? 'fw-bold text-success' : 'fw-semibold text-muted' }}" href="/agenda"><i class="bi bi-calendar3 me-1"></i> Agenda</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->is('agendamento*') ? 'fw-bold text-success' : 'fw-semibold text-muted' }}" href="/agendamento"><i class="bi bi-calendar-plus me-1"></i> Nova Reserva</a>
                             </li>
                         @endif
 

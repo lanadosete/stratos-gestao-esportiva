@@ -4,16 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ArenaEsporte extends Model
+class QuadraEsporte extends Model
 {
     protected $fillable = [
-        'arena_id',
+        'quadra_id',
         'nome',
         'ativo',
     ];
 
-    public function arena()
+    public function quadra()
     {
-        return $this->belongsTo(Arena::class);
+        return $this->belongsTo(Quadra::class);
     }
 }

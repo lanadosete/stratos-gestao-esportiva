@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('complexos', function (Blueprint $table) {
+        Schema::create('arenas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('nome');
@@ -17,6 +17,6 @@ return new class extends Migration {
     }
 
     public function down(): void {
-        Schema::dropIfExists('complexos');
+        Schema::dropIfExists('arenas');
     }
 };

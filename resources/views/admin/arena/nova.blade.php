@@ -4,7 +4,12 @@
 <div class="bg-gradient-stratos" style="min-height: 100vh;">
 <div class="container py-5 d-flex justify-content-center align-items-center" style="min-height: 80vh;">
     <div class="card card-stratos p-5 shadow-sm border-0" style="width: 100%; max-width: 600px;">
-        
+
+        <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
+            <span class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal"><i class="bi bi-check2 me-1"></i> 1. Identificação</span>
+            <span class="badge bg-success px-4 py-2 rounded-pill fs-6 fw-normal shadow-sm">2. Arena</span>
+        </div>
+
         <div class="text-center mb-5">
             <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle mb-3" style="width: 70px; height: 70px;">
                 <i class="bi bi-building fs-1"></i>
@@ -13,11 +18,11 @@
             <p class="text-muted">Vamos registrar o seu <strong class="text-success">Espaço Esportivo</strong> para começarmos.</p>
         </div>
 
-        <form action="/admin/complexo/salvar" method="POST" novalidate>
+        <form action="/admin/arena/salvar" method="POST" novalidate>
             @csrf
-            
+
             <div class="mb-3">
-                <label class="form-label small fw-bold text-muted text-uppercase">Nome do Complexo / Estabelecimento</label>
+                <label class="form-label small fw-bold text-muted text-uppercase">Nome da Arena / Estabelecimento</label>
                 <div class="input-group input-group-lg shadow-sm rounded-3">
                     <span class="input-group-text border-0 bg-light"><i class="bi bi-fonts text-muted"></i></span>
                     <input type="text" name="nome" class="form-control border-0 bg-light" value="{{ old('nome') }}" placeholder="Ex: Arena Sol Nascente">
@@ -51,7 +56,7 @@
 
             <div class="card bg-light border-0 rounded-3 p-3 mb-4">
                 <h6 class="fw-bold text-dark mb-2">Dias de funcionamento geral</h6>
-                <p class="text-muted small mb-3">Marque os dias em que o complexo opera. Os horários definidos abaixo valerão para todos os dias selecionados.</p>
+                <p class="text-muted small mb-3">Marque os dias em que a arena opera. Os horários definidos abaixo valerão para todos os dias selecionados.</p>
                 <div class="mb-3">
                     <div class="d-flex flex-wrap gap-2">
                         @php $dias = [['value' => '0', 'label' => 'Dom'], ['value' => '1', 'label' => 'Seg'], ['value' => '2', 'label' => 'Ter'], ['value' => '3', 'label' => 'Qua'], ['value' => '4', 'label' => 'Qui'], ['value' => '5', 'label' => 'Sex'], ['value' => '6', 'label' => 'Sáb']]; @endphp

@@ -8,10 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('arena_preco_turnos')) {
-            Schema::create('arena_preco_turnos', function (Blueprint $table) {
+        if (!Schema::hasTable('quadra_preco_turnos')) {
+            Schema::create('quadra_preco_turnos', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('arena_id')->constrained('arenas')->onDelete('cascade');
+                $table->foreignId('quadra_id')->constrained('quadras')->onDelete('cascade');
                 $table->string('esporte');
                 $table->string('turno');
                 $table->decimal('valor_hora', 8, 2);
@@ -22,6 +22,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('arena_preco_turnos');
+        Schema::dropIfExists('quadra_preco_turnos');
     }
 };

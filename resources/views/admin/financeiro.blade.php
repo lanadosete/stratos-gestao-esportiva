@@ -89,7 +89,7 @@
                                 <small class="text-muted">{{ $reserva->horario }}</small>
                             </td>
                             <td>
-                                <span class="fw-semibold">{{ $reserva->arena->nome ?? 'Quadra Removida' }}</span>
+                                <span class="fw-semibold">{{ $reserva->quadra->nome ?? 'Quadra Removida' }}</span>
                             </td>
                             <td class="fw-bold text-dark">
                                 R$ {{ number_format($reserva->valor_total, 2, ',', '.') }}

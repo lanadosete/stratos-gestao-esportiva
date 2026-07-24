@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Complexo;
-use App\Models\ComplexoFuncionamento;
+use App\Models\Arena;
+use App\Models\ArenaFuncionamento;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 
-class ComplexoController extends Controller
+class ArenaController extends Controller
 {
     private function normalizeTime(?string $time): ?string
     {
@@ -20,12 +20,12 @@ class ComplexoController extends Controller
         return date('H:i:s', strtotime($time));
     }
 
-    private function ensureComplexoFuncionamentoTable(): void
+    private function ensureArenaFuncionamentoTable(): void
     {
-        if (!Schema::hasTable('complexo_funcionamentos')) {
-            Schema::create('complexo_funcionamentos', function (Blueprint $table) {
+        if (!Schema::hasTable('arena_funcionamentos')) {
+            Schema::create('arena_funcionamentos', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('complexo_id')->constrained('complexos')->onDelete('cascade');
+                $table->foreignId('arena_id')->constrained('arenas')->onDelete('cascade');
                 $table->integer('dia_semana');
                 $table->time('hora_abertura')->nullable();
                 $table->time('hora_fechamento')->nullable();
@@ -45,8 +45,8 @@ class ComplexoController extends Controller
             'hora_abertura' => 'required',
             'hora_fechamento' => 'required',
         ], [
-            'nome.required' => 'O nome do complexo é obrigatório.',
-            'nome.max' => 'O nome do complexo deve ter no máximo 255 caracteres.',
+            'nome.required' => 'O nome da arena é obrigatório.',
+            'nome.max' => 'O nome da arena deve ter no máximo 255 caracteres.',
             'endereco.required' => 'O endereço é obrigatório.',
             'endereco.max' => 'O endereço deve ter no máximo 255 caracteres.',
             'telefone.required' => 'O telefone é obrigatório.',
@@ -58,14 +58,17 @@ class ComplexoController extends Controller
             'hora_fechamento.required' => 'Informe o horário de fim de expediente.',
         ]);
 
-        $complexo = Complexo::create([
+        $arena = Arena::create([
             'user_id' => Auth::id(),
             'nome' => $request->nome,
             'endereco' => $request->endereco,
             'telefone' => $request->telefone,
         ]);
 
-        $this->ensureComplexoFuncionamentoTable();
+        // Vincula o admin dono à arena que acabou de criar
+        Auth::user()->update(['arena_id' => $arena->id]);
+
+        $this->ensureArenaFuncionamentoTable();
 
         if ($request->filled('hora_abertura') && $request->filled('hora_fechamento')) {
             $dias = $request->input('dias_semana', []);
@@ -75,8 +78,8 @@ class ComplexoController extends Controller
             }
 
             foreach ($dias as $dia) {
-                ComplexoFuncionamento::create([
-                    'complexo_id' => $complexo->id,
+                ArenaFuncionamento::create([
+                    'arena_id' => $arena->id,
                     'dia_semana' => $dia,
                     'hora_abertura' => $this->normalizeTime($request->hora_abertura),
                     'hora_fechamento' => $this->normalizeTime($request->hora_fechamento),
@@ -85,21 +88,21 @@ class ComplexoController extends Controller
             }
         }
 
-        return redirect('/admin/dashboard')->with('success', 'Complexo registrado com sucesso!');
+        return redirect('/admin/dashboard')->with('success', 'Arena registrada com sucesso!');
     }
 
     public function editar($id)
     {
-        $this->ensureComplexoFuncionamentoTable();
-        $complexo = Complexo::where('user_id', Auth::id())->findOrFail($id);
+        $this->ensureArenaFuncionamentoTable();
+        $arena = Arena::where('user_id', Auth::id())->findOrFail($id);
 
-        return view('admin.complexo.editar', compact('complexo'));
+        return view('admin.arena.editar', compact('arena'));
     }
 
     public function atualizar(Request $request, $id)
     {
-        $complexo = Complexo::where('user_id', Auth::id())->findOrFail($id);
-        $this->ensureComplexoFuncionamentoTable();
+        $arena = Arena::where('user_id', Auth::id())->findOrFail($id);
+        $this->ensureArenaFuncionamentoTable();
 
         $request->validate([
             'nome' => 'required|string|max:255',
@@ -109,8 +112,8 @@ class ComplexoController extends Controller
             'hora_abertura' => 'required',
             'hora_fechamento' => 'required',
         ], [
-            'nome.required' => 'O nome do complexo é obrigatório.',
-            'nome.max' => 'O nome do complexo deve ter no máximo 255 caracteres.',
+            'nome.required' => 'O nome da arena é obrigatório.',
+            'nome.max' => 'O nome da arena deve ter no máximo 255 caracteres.',
             'endereco.required' => 'O endereço é obrigatório.',
             'endereco.max' => 'O endereço deve ter no máximo 255 caracteres.',
             'telefone.required' => 'O telefone é obrigatório.',
@@ -122,7 +125,7 @@ class ComplexoController extends Controller
             'hora_fechamento.required' => 'Informe o horário de fim de expediente.',
         ]);
 
-        $complexo->update([
+        $arena->update([
             'nome' => $request->nome,
             'endereco' => $request->endereco,
             'telefone' => $request->telefone,
@@ -135,11 +138,11 @@ class ComplexoController extends Controller
                 $dias = [$request->dia_semana];
             }
 
-            $complexo->funcionamento()->where('ativo', true)->delete();
+            $arena->funcionamento()->where('ativo', true)->delete();
 
             foreach ($dias as $dia) {
-                ComplexoFuncionamento::create([
-                    'complexo_id' => $complexo->id,
+                ArenaFuncionamento::create([
+                    'arena_id' => $arena->id,
                     'dia_semana' => $dia,
                     'hora_abertura' => $this->normalizeTime($request->hora_abertura),
                     'hora_fechamento' => $this->normalizeTime($request->hora_fechamento),
@@ -148,6 +151,6 @@ class ComplexoController extends Controller
             }
         }
 
-        return redirect('/admin/dashboard')->with('success', 'Complexo atualizado com sucesso!');
+        return redirect('/admin/dashboard')->with('success', 'Arena atualizada com sucesso!');
     }
 }

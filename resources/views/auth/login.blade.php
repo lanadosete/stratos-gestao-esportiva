@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('conteudo')
-<div class="container-fluid p-0 d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+<div class="container-fluid p-0 d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 61px);">
     <div class="card card-stratos p-5 shadow-sm border-0" style="width: 100%; max-width: 450px;">
         
         <div class="text-center mb-4">

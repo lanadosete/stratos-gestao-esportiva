@@ -125,8 +125,8 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="d-block fw-bold {{ $statusCalc === 'finalizado' ? 'text-muted' : 'text-dark' }}">{{ $jogo->arena->nome ?? 'Quadra' }}</span>
-                                <small class="text-muted">{{ $jogo->arena->tipo_esporte ?? 'Esporte' }}</small>
+                                <span class="d-block fw-bold {{ $statusCalc === 'finalizado' ? 'text-muted' : 'text-dark' }}">{{ $jogo->quadra->nome ?? 'Quadra' }}</span>
+                                <small class="text-muted">{{ $jogo->esporte ?? 'Esporte' }}</small>
                             </td>
 
                             <!-- Status do horário (calculado por tempo, independente de pagamento) -->
@@ -138,7 +138,7 @@
                                         </span>
                                         @break
                                     @case('a_iniciar')
-                                        <span class="badge bg-primary bg-opacity-10 text-primary border-0 px-2 py-1">
+                                        <span class="badge bg-amber-soft text-amber border-0 px-2 py-1">
                                             <i class="bi bi-hourglass-split me-1"></i> A Iniciar
                                         </span>
                                         @break
@@ -168,10 +168,16 @@
                                 @endif
                             </td>
 
-                            <!-- Ações: confirmar pagamento (se pendente) e cancelar (admin/funcionário) -->
+                            <!-- Ações: contato via WhatsApp, confirmar pagamento (se pendente) e cancelar (admin/funcionário) -->
                             <td class="text-end">
-                                @if($statusCalc !== 'cancelado')
-                                    <div class="d-flex gap-2 justify-content-end flex-wrap">
+                                <div class="d-flex gap-2 justify-content-end flex-wrap">
+                                    @if($jogo->whatsapp_link)
+                                        <a href="{{ $jogo->whatsapp_link }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold">
+                                            <i class="bi bi-whatsapp me-1"></i> Entrar em contato
+                                        </a>
+                                    @endif
+
+                                    @if($statusCalc !== 'cancelado')
                                         @if(!$jogo->pago)
                                             <form action="/recepcao/reservas/{{ $jogo->id }}/pagamento" method="POST" class="m-0">
                                                 @csrf
@@ -189,8 +195,8 @@
                                                 </button>
                                             </form>
                                         @endif
-                                    </div>
-                                @endif
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

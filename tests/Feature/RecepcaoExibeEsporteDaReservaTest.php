@@ -7,20 +7,21 @@ use App\Models\ArenaFuncionamento;
 use App\Models\Quadra;
 use App\Models\QuadraEsporte;
 use App\Models\QuadraPrecoTurno;
+use App\Models\Reserva;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class ReservaPorEsporteETurnoTest extends TestCase
+class RecepcaoExibeEsporteDaReservaTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_configure_prices_by_sport_and_turn_and_reservation_uses_them(): void
+    public function test_reserva_via_agendamento_persiste_o_esporte_escolhido(): void
     {
         Carbon::setTestNow(Carbon::today()->setTime(10, 0));
 
-        $user = User::create([
+        $admin = User::create([
             'name' => 'Admin Teste',
             'email' => 'admin@test.com',
             'password' => bcrypt('12345678'),
@@ -28,7 +29,7 @@ class ReservaPorEsporteETurnoTest extends TestCase
         ]);
 
         $arena = Arena::create([
-            'user_id' => $user->id,
+            'user_id' => $admin->id,
             'nome' => 'Arena Teste',
             'endereco' => 'Rua Teste',
             'telefone' => '11999999999',
@@ -48,35 +49,31 @@ class ReservaPorEsporteETurnoTest extends TestCase
             'ativo' => true,
         ]);
 
-        QuadraEsporte::create([
-            'quadra_id' => $quadra->id,
-            'nome' => 'Futevôlei',
-            'ativo' => true,
+        QuadraEsporte::create(['quadra_id' => $quadra->id, 'nome' => 'Beach Tênis', 'ativo' => true]);
+        QuadraPrecoTurno::create(['quadra_id' => $quadra->id, 'esporte' => 'Beach Tênis', 'turno' => 'Manhã', 'valor_hora' => 100]);
+
+        $cliente = User::create([
+            'name' => 'Cliente Teste',
+            'email' => 'cliente@test.com',
+            'password' => bcrypt('12345678'),
+            'tipo_conta' => 'cliente',
         ]);
 
-        QuadraPrecoTurno::create([
-            'quadra_id' => $quadra->id,
-            'esporte' => 'Futevôlei',
-            'turno' => 'Noite',
-            'valor_hora' => 145.00,
-        ]);
-
-        $this->actingAs($user);
-
-        $response = $this->post('/agendamento/finalizar', [
+        $this->actingAs($cliente)->post('/agendamento/finalizar', [
             'quadra_id' => $quadra->id,
             'data_reserva' => Carbon::today()->toDateString(),
-            'horarios' => ['21:00'],
-            'esporte' => 'Futevôlei',
+            'horarios' => ['11:00'],
+            'esporte' => 'Beach Tênis',
             'metodo_pagamento' => 'pix',
         ]);
 
-        $response->assertRedirectContains('/agendamento/');
-        $this->assertDatabaseHas('reservas', [
-            'quadra_id' => $quadra->id,
-            'user_id' => $user->id,
-            'valor_total' => 145.00,
-        ]);
+        $reserva = Reserva::where('quadra_id', $quadra->id)->firstOrFail();
+        $this->assertSame('Beach Tênis', $reserva->esporte);
+
+        $response = $this->actingAs($admin)->get('/recepcao');
+        $response->assertOk();
+        $response->assertSee('Beach Tênis');
+        $response->assertDontSee('Multiuso');
 
         Carbon::setTestNow();
     }

@@ -4,20 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ComplexoFuncionamento extends Model
+class ArenaFuncionamento extends Model
 {
-    protected $table = 'complexo_funcionamentos';
+    protected $table = 'arena_funcionamentos';
 
     protected $fillable = [
-        'complexo_id',
+        'arena_id',
         'dia_semana',
         'hora_abertura',
         'hora_fechamento',
         'ativo',
     ];
 
-    public function complexo()
+    public function arena()
     {
-        return $this->belongsTo(Complexo::class);
+        return $this->belongsTo(Arena::class);
     }
 }

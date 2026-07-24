@@ -15,8 +15,8 @@ return new class extends Migration
         Schema::dropIfExists('grade_horarios');
         Schema::dropIfExists('arena_funcionamento');
 
-        if (Schema::hasColumn('arenas', 'preco_hora')) {
-            Schema::table('arenas', function (Blueprint $table) {
+        if (Schema::hasColumn('quadras', 'preco_hora')) {
+            Schema::table('quadras', function (Blueprint $table) {
                 $table->dropColumn('preco_hora');
             });
         }
@@ -27,7 +27,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('arenas', function (Blueprint $table) {
+        Schema::table('quadras', function (Blueprint $table) {
             $table->decimal('preco_hora', 8, 2)->default(0);
         });
 

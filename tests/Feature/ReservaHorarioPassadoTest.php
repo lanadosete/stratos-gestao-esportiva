@@ -3,11 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Arena;
-use App\Models\ArenaEsporte;
-use App\Models\ArenaPrecoTurno;
-use App\Models\Complexo;
-use App\Models\ComplexoFuncionamento;
-use App\Models\Reserva;
+use App\Models\ArenaFuncionamento;
+use App\Models\Quadra;
+use App\Models\QuadraEsporte;
+use App\Models\QuadraPrecoTurno;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -28,29 +27,29 @@ class ReservaHorarioPassadoTest extends TestCase
             'tipo_conta' => 'admin',
         ]);
 
-        $complexo = Complexo::create([
+        $arena = Arena::create([
             'user_id' => $admin->id,
-            'nome' => 'Complexo Teste',
+            'nome' => 'Arena Teste',
             'endereco' => 'Rua Teste',
             'telefone' => '11999999999',
         ]);
 
-        $arena = Arena::create([
-            'complexo_id' => $complexo->id,
-            'nome' => 'Arena 1',
+        $quadra = Quadra::create([
+            'arena_id' => $arena->id,
+            'nome' => 'Quadra 1',
             'tipo_esporte' => 'Multiuso',
         ]);
 
-        ComplexoFuncionamento::create([
-            'complexo_id' => $complexo->id,
+        ArenaFuncionamento::create([
+            'arena_id' => $arena->id,
             'dia_semana' => Carbon::today()->dayOfWeek,
             'hora_abertura' => '08:00:00',
             'hora_fechamento' => '23:00:00',
             'ativo' => true,
         ]);
 
-        ArenaEsporte::create(['arena_id' => $arena->id, 'nome' => 'Futevôlei', 'ativo' => true]);
-        ArenaPrecoTurno::create(['arena_id' => $arena->id, 'esporte' => 'Futevôlei', 'turno' => 'Tarde', 'valor_hora' => 100]);
+        QuadraEsporte::create(['quadra_id' => $quadra->id, 'nome' => 'Futevôlei', 'ativo' => true]);
+        QuadraPrecoTurno::create(['quadra_id' => $quadra->id, 'esporte' => 'Futevôlei', 'turno' => 'Tarde', 'valor_hora' => 100]);
 
         $cliente = User::create([
             'name' => 'Cliente Teste',
@@ -61,7 +60,7 @@ class ReservaHorarioPassadoTest extends TestCase
 
         // Agora são 15:00 — tentar reservar as 14:00 (já passou) deve falhar
         $response = $this->actingAs($cliente)->post('/agendamento/finalizar', [
-            'arena_id' => $arena->id,
+            'quadra_id' => $quadra->id,
             'data_reserva' => Carbon::today()->toDateString(),
             'horarios' => ['14:00'],
             'esporte' => 'Futevôlei',
@@ -73,7 +72,7 @@ class ReservaHorarioPassadoTest extends TestCase
 
         // Reservar as 16:00 (ainda não chegou) deve funcionar normalmente
         $response = $this->actingAs($cliente)->post('/agendamento/finalizar', [
-            'arena_id' => $arena->id,
+            'quadra_id' => $quadra->id,
             'data_reserva' => Carbon::today()->toDateString(),
             'horarios' => ['16:00'],
             'esporte' => 'Futevôlei',
@@ -97,21 +96,21 @@ class ReservaHorarioPassadoTest extends TestCase
             'tipo_conta' => 'admin',
         ]);
 
-        $complexo = Complexo::create([
+        $arena = Arena::create([
             'user_id' => $admin->id,
-            'nome' => 'Complexo Teste',
+            'nome' => 'Arena Teste',
             'endereco' => 'Rua Teste',
             'telefone' => '11999999999',
         ]);
 
-        $arena = Arena::create([
-            'complexo_id' => $complexo->id,
-            'nome' => 'Arena 1',
+        $quadra = Quadra::create([
+            'arena_id' => $arena->id,
+            'nome' => 'Quadra 1',
             'tipo_esporte' => 'Multiuso',
         ]);
 
-        ComplexoFuncionamento::create([
-            'complexo_id' => $complexo->id,
+        ArenaFuncionamento::create([
+            'arena_id' => $arena->id,
             'dia_semana' => Carbon::today()->dayOfWeek,
             'hora_abertura' => '08:00:00',
             'hora_fechamento' => '23:00:00',
@@ -126,7 +125,7 @@ class ReservaHorarioPassadoTest extends TestCase
         ]);
 
         $response = $this->actingAs($cliente)->getJson(
-            '/agendamento/horarios-disponiveis?arena_id=' . $arena->id . '&data=' . Carbon::today()->toDateString()
+            '/agendamento/horarios-disponiveis?quadra_id=' . $quadra->id . '&data=' . Carbon::today()->toDateString()
         );
 
         $response->assertOk();

@@ -34,12 +34,36 @@ class AuthController extends Controller
         Auth::login($user);
 
         // 4. Direciona para o painel correto
-        // Agora ele vai para o dashboard, que fará a verificação se o complexo já existe
+        // Agora ele vai para o dashboard, que fará a verificação se a arena já existe
         if ($user->tipo_conta === 'admin') {
             return redirect('/admin/dashboard'); 
         }
         
         return redirect('/');
+    }
+
+    // Passo 1 do wizard de cadastro de proprietário: cria o usuário admin e
+    // manda para o passo 2 (/admin/arena/nova), que cadastra a arena em si.
+    public function registrarAdmin(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'telefone' => 'required|string|max:20',
+            'password' => 'required|string|min:6',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'telefone' => $request->telefone,
+            'password' => Hash::make($request->password),
+            'tipo_conta' => 'admin',
+        ]);
+
+        Auth::login($user);
+
+        return redirect('/admin/arena/nova');
     }
 
     // Login da área principal — exclusivo para clientes (jogadores)
@@ -52,7 +76,7 @@ class AuthController extends Controller
         );
     }
 
-    // Login administrativo — exclusivo para donos de complexo (admin) e funcionários
+    // Login administrativo — exclusivo para donos de arena (admin) e funcionários
     public function entrarStaff(Request $request)
     {
         return $this->autenticar(
@@ -97,7 +121,10 @@ class AuthController extends Controller
             return redirect($redirect);
         }
 
-        return redirect('/');
+        // Se o cliente foi barrado por uma rota protegida (ex.: clicou em "Ir para
+        // Pagamento" sem estar logado), o Laravel já guardou a URL de destino —
+        // volta pra lá com a quadra/data/horário/esporte escolhidos preservados.
+        return redirect()->intended('/');
     }
 
     // Função para Sair (Logout)

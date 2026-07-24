@@ -5,12 +5,12 @@
         <div class="col-md-8">
 
             <div class="d-flex align-items-center mb-4">
-                <a href="/admin/arenas" class="btn btn-light rounded-circle shadow-sm me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                <a href="/admin/quadras" class="btn btn-light rounded-circle shadow-sm me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                     <i class="bi bi-arrow-left"></i>
                 </a>
                 <div>
-                    <h3 class="fw-bold mb-0">Editar Arena</h3>
-                    <p class="text-muted mb-0">Atualize os dados da sua arena.</p>
+                    <h3 class="fw-bold mb-0">Editar Quadra</h3>
+                    <p class="text-muted mb-0">Atualize os dados da sua quadra.</p>
                 </div>
             </div>
 
@@ -26,7 +26,7 @@
                     </div>
                 @endif
 
-                <form action="/admin/arenas/{{ $arena->id }}/atualizar" method="POST">
+                <form action="/admin/quadras/{{ $quadra->id }}/atualizar" method="POST">
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
                             document.querySelectorAll('.esporte-checkbox').forEach(function (checkbox) {
@@ -47,17 +47,17 @@
                     @csrf
 
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Nome / Identificação da Arena</label>
-                        <input type="text" name="nome" value="{{ old('nome', $arena->nome) }}" class="form-control form-control-lg bg-light border-0 shadow-sm" placeholder="Ex: Arena 1 - Areia" required>
+                        <label class="form-label small fw-bold text-muted text-uppercase">Nome / Identificação da Quadra</label>
+                        <input type="text" name="nome" value="{{ old('nome', $quadra->nome) }}" class="form-control form-control-lg bg-light border-0 shadow-sm" placeholder="Ex: Quadra 1 - Areia" required>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Esportes que funcionarão na arena</label>
+                        <label class="form-label small fw-bold text-muted text-uppercase">Esportes que funcionarão na quadra <span class="text-danger">*</span></label>
                         <div class="border rounded-3 p-3 bg-light">
                             @php
                                 $esportesFixos = ['Beach Vôlei', 'Beach Tênis', 'Futevôlei'];
-                                $esportesAtivos = $arena->esportes->pluck('nome')->toArray();
-                                $precosAtuais = $arena->precosTurno->groupBy('esporte');
+                                $esportesAtivos = $quadra->esportes->pluck('nome')->toArray();
+                                $precosAtuais = $quadra->precosTurno->groupBy('esporte');
                             @endphp
                             @foreach($esportesFixos as $esporte)
                                 @php
@@ -90,6 +90,9 @@
                                 </div>
                             @endforeach
                         </div>
+                        @error('esportes')
+                            <div class="text-danger small mt-2"><i class="bi bi-exclamation-circle me-1"></i>{{ $message }}</div>
+                        @enderror
                         <div class="form-text text-muted small mt-2"><i class="bi bi-info-circle me-1"></i> Marque os esportes que irão funcionar e defina o preço por turno para cada um.</div>
                     </div>
 

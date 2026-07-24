@@ -27,10 +27,6 @@
                 </form>
             </div>
 
-            @php
-                $funcionarios = \App\Models\User::where('tipo_conta', 'funcionario')->get();
-            @endphp
-
             <h5 class="fw-bold mb-3">Equipe Atual</h5>
             <div class="card card-stratos p-0 border-0 shadow-sm rounded-4">
                 <table class="table align-middle mb-0">

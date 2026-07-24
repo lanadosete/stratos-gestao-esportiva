@@ -20,7 +20,7 @@
             <div class="d-flex gap-2 flex-wrap">
                 <!-- BOTÃO INTELIGENTE: Muda de acordo com quem está acessando -->
                 @guest
-                    <a href="/login?redirect=/agendamento" class="btn btn-verde px-4 py-3 fw-bold rounded-pill shadow-sm">Buscar arenas</a>
+                    <a href="/agendamento" class="btn btn-verde px-4 py-3 fw-bold rounded-pill shadow-sm">Buscar arenas</a>
                 @endguest
                 
                 @auth

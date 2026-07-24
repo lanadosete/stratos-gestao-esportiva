@@ -16,8 +16,11 @@
             <a href="/admin/dashboard" class="admin-nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}">
                 <i class="bi bi-grid-1x2-fill"></i> <span>Painel Geral</span>
             </a>
-            <a href="/admin/arenas" class="admin-nav-link {{ (request()->is('admin/arenas*') || request()->is('admin/arena/*')) ? 'active' : '' }}">
-                <i class="bi bi-geo-alt-fill"></i> <span>Minhas Arenas</span>
+            <a href="/agenda" class="admin-nav-link {{ (request()->is('agenda') || request()->is('agenda/*')) ? 'active' : '' }}">
+                <i class="bi bi-calendar3"></i> <span>Agenda</span>
+            </a>
+            <a href="/admin/quadras" class="admin-nav-link {{ (request()->is('admin/quadras*') || request()->is('admin/arena/*')) ? 'active' : '' }}">
+                <i class="bi bi-geo-alt-fill"></i> <span>Minhas Quadras</span>
             </a>
             <a href="/admin/financeiro" class="admin-nav-link {{ request()->is('admin/financeiro*') ? 'active' : '' }}">
                 <i class="bi bi-graph-up-arrow"></i> <span>Financeiro</span>

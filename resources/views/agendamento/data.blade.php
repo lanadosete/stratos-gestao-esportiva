@@ -2,14 +2,14 @@
 
 @section('conteudo')
 @php
-    $esportesAtivos = $arena->esportes->where('ativo', true)->values();
-    $precosMap = $arena->precosTurno->groupBy('esporte')->map(function ($itens) {
+    $esportesAtivos = $quadra->esportes->where('ativo', true)->values();
+    $precosMap = $quadra->precosTurno->groupBy('esporte')->map(function ($itens) {
         return $itens->pluck('valor_hora', 'turno');
     });
-    $precoMinimo = $arena->precosTurno->min('valor_hora');
+    $precoMinimo = $quadra->precosTurno->min('valor_hora');
 
     $dataInicial = now()->format('Y-m-d');
-    $funcionamentoInicial = $arena->complexo->funcionamento
+    $funcionamentoInicial = $quadra->arena->funcionamento
         ->where('dia_semana', now()->dayOfWeek)
         ->where('ativo', true)
         ->first();
@@ -19,7 +19,7 @@
         $abertura = (int) substr($funcionamentoInicial->hora_abertura, 0, 2);
         $fechamento = (int) substr($funcionamentoInicial->hora_fechamento, 0, 2);
 
-        $ocupados = \App\Models\Reserva::where('arena_id', $arena->id)
+        $ocupados = \App\Models\Reserva::where('quadra_id', $quadra->id)
             ->where('data_reserva', $dataInicial)
             ->where('status', '!=', 'cancelado')
             ->pluck('horario')
@@ -50,20 +50,20 @@
         <div class="col-md-10">
 
             <div class="d-flex flex-wrap gap-2 mb-5 mt-3">
-                <a href="/agendamento" class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal text-decoration-none"><i class="bi bi-check2 me-1"></i> 1. Complexo</a>
-                <a href="/agendamento/arenas?complexo_id={{ $arena->complexo_id }}" class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal text-decoration-none"><i class="bi bi-check2 me-1"></i> 2. Quadra</a>
+                <a href="/agendamento" class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal text-decoration-none"><i class="bi bi-check2 me-1"></i> 1. Arena</a>
+                <a href="/agendamento/quadras?arena_id={{ $quadra->arena_id }}" class="badge bg-success bg-opacity-25 text-success px-4 py-2 rounded-pill fs-6 fw-normal text-decoration-none"><i class="bi bi-check2 me-1"></i> 2. Quadra</a>
                 <span class="badge bg-success px-4 py-2 rounded-pill fs-6 fw-normal shadow-sm">3. Data e Hora</span>
                 <span class="badge bg-light text-secondary border px-4 py-2 rounded-pill fs-6 fw-normal">4. Pagamento</span>
             </div>
 
             <div class="mb-4">
                 <h3 class="fw-bold mb-1">Configure o seu Jogo</h3>
-                <p class="text-muted">Selecione o esporte, a data e o horário para jogar na <strong class="text-success">{{ $arena->nome }}</strong>.</p>
+                <p class="text-muted">Selecione o esporte, a data e o horário para jogar na <strong class="text-success">{{ $quadra->nome }}</strong>.</p>
             </div>
 
             <div class="card bg-light p-4 shadow-sm border-0 mb-4 rounded-3 d-flex flex-row align-items-center justify-content-between flex-wrap gap-2">
                 <div>
-                    <h5 class="mb-1 fw-bold text-dark">{{ $arena->nome }}</h5>
+                    <h5 class="mb-1 fw-bold text-dark">{{ $quadra->nome }}</h5>
                     <small class="text-muted">O valor varia por esporte e turno</small>
                 </div>
                 <div class="text-end">
@@ -78,7 +78,7 @@
                         <h5 class="mb-4 fw-bold">1. Escolha o dia</h5>
                         <input type="text" id="data-reserva" class="form-control form-control-lg border-0 bg-light text-center fw-bold text-success shadow-none" style="border-radius: 8px; cursor: pointer;" placeholder="Clique para selecionar o dia">
                         <hr class="my-4 text-muted">
-                        <p class="text-muted small mb-0"><i class="bi bi-info-circle me-1"></i> Dias em cinza representam datas passadas. Se o complexo não funcionar no dia escolhido, os horários não ficam disponíveis.</p>
+                        <p class="text-muted small mb-0"><i class="bi bi-info-circle me-1"></i> Dias em cinza representam datas passadas. Se a arena não funcionar no dia escolhido, os horários não ficam disponíveis.</p>
                     </div>
                 </div>
 
@@ -98,7 +98,7 @@
                         <h5 class="mb-4 fw-bold">3. Escolha os horários</h5>
 
                         <div id="aviso-fechado" class="alert alert-secondary small d-none">
-                            <i class="bi bi-info-circle me-1"></i> O complexo não funciona neste dia. Escolha outra data.
+                            <i class="bi bi-info-circle me-1"></i> A arena não funciona neste dia. Escolha outra data.
                         </div>
 
                         <div class="d-flex flex-wrap gap-2 mb-4" id="grade-horarios"></div>
@@ -135,7 +135,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/pt.js"></script>
 
 <script>
-    const arenaId = {{ $arena->id }};
+    const quadraId = {{ $quadra->id }};
     const precosPorEsporte = @json($precosMap);
     const horariosIniciais = @json($horariosIniciais);
     const abertoInicial = {{ $funcionamentoInicial ? 'true' : 'false' }};
@@ -247,7 +247,7 @@
             } else {
                 avisoPreco.classList.add('d-none');
                 btnAvancar.classList.remove('disabled');
-                const urlBase = `/agendamento/pagamento?arena_id=${arenaId}`;
+                const urlBase = `/agendamento/pagamento?quadra_id=${quadraId}`;
                 btnAvancar.href = `${urlBase}&data=${dataSelecionada}&horario=${encodeURIComponent(horariosStr)}&esporte=${encodeURIComponent(esporte)}`;
             }
         } else {
@@ -258,7 +258,7 @@
     }
 
     function carregarHorarios(data) {
-        fetch(`/agendamento/horarios-disponiveis?arena_id=${arenaId}&data=${data}`)
+        fetch(`/agendamento/horarios-disponiveis?quadra_id=${quadraId}&data=${data}`)
             .then(function (r) { return r.json(); })
             .then(function (json) { renderHorarios(json.horarios, json.aberto); })
             .catch(function () { renderHorarios([], false); });

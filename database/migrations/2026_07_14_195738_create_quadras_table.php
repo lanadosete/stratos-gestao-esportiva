@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('arenas', function (Blueprint $table) {
+        Schema::create('quadras', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('complexo_id')->constrained('complexos')->onDelete('cascade');
+            $table->foreignId('arena_id')->constrained('arenas')->onDelete('cascade');
             $table->string('nome');
             $table->string('tipo_esporte');
             $table->decimal('preco_hora', 8, 2);
@@ -17,6 +17,6 @@ return new class extends Migration {
     }
 
     public function down(): void {
-        Schema::dropIfExists('arenas');
+        Schema::dropIfExists('quadras');
     }
 };

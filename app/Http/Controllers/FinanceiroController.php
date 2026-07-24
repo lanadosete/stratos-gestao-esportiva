@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Complexo;
+use App\Models\Arena;
 use App\Models\Reserva;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,16 +17,16 @@ class FinanceiroController extends Controller
             return redirect('/');
         }
 
-        // 1. Busca o complexo do dono logado (A sua excelente lógica!)
-        $complexo = Complexo::where('user_id', Auth::id())->first();
+        // 1. Busca a arena do dono logado (A sua excelente lógica!)
+        $arena = Arena::where('user_id', Auth::id())->first();
 
-        // Se não tiver complexo, manda criar
-        if (!$complexo) {
-            return redirect('/admin/complexo/nova');
+        // Se não tiver arena, manda criar
+        if (!$arena) {
+            return redirect('/admin/arena/nova');
         }
 
-        // 2. Pega os IDs de todas as quadras desse complexo
-        $arenaIds = $complexo->arenas()->pluck('id');
+        // 2. Pega os IDs de todas as quadras dessa arena
+        $quadraIds = $arena->quadras()->pluck('id');
 
         // Preparando as datas do mês atual para a nova tela
         $mesAtual = Carbon::now()->month;
@@ -34,8 +34,8 @@ class FinanceiroController extends Controller
         $nomeMes = Carbon::now()->translatedFormat('F \d\e Y');
 
         // 3. Busca as reservas APENAS deste mês e destas quadras
-        $reservasMes = Reserva::with(['user', 'arena'])
-            ->whereIn('arena_id', $arenaIds)
+        $reservasMes = Reserva::with(['user', 'quadra'])
+            ->whereIn('quadra_id', $quadraIds)
             ->whereMonth('data_reserva', $mesAtual)
             ->whereYear('data_reserva', $anoAtual)
             ->where('status', '!=', 'cancelado')

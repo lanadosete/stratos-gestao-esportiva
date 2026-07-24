@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ArenaPrecoTurno;
-use App\Models\ComplexoFuncionamento;
+use App\Models\ArenaFuncionamento;
+use App\Models\QuadraPrecoTurno;
 use App\Models\Reserva;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -16,7 +16,7 @@ class ReservaController extends Controller
     {
         // 1. Validação inicial
         $request->validate([
-            'arena_id' => 'required|exists:arenas,id',
+            'quadra_id' => 'required|exists:quadras,id',
             'data_reserva' => 'required|date',
             'horarios' => 'required|array', // Agora recebemos um array de horários
             'esporte' => 'required|string', // Importante para definir o preço
@@ -50,14 +50,14 @@ class ReservaController extends Controller
         $totalCalculado = 0;
         $horariosSelecionados = $request->horarios;
 
-        $arena = \App\Models\Arena::findOrFail($request->arena_id);
-        $funcionamento = ComplexoFuncionamento::where('complexo_id', $arena->complexo_id)
+        $quadra = \App\Models\Quadra::findOrFail($request->quadra_id);
+        $funcionamento = ArenaFuncionamento::where('arena_id', $quadra->arena_id)
             ->where('dia_semana', $dataReserva->dayOfWeek)
             ->where('ativo', true)
             ->first();
 
         if (!$funcionamento) {
-            return back()->withErrors(['data_reserva' => 'O complexo não opera neste dia da semana.']);
+            return back()->withErrors(['data_reserva' => 'A arena não opera neste dia da semana.']);
         }
 
         foreach ($horariosSelecionados as $hora) {
@@ -66,7 +66,7 @@ class ReservaController extends Controller
             $fechamento = strtotime($funcionamento->hora_fechamento);
 
             if ($horaComparacao < $abertura || $horaComparacao > $fechamento) {
-                return back()->withErrors(['horario' => "O horário {$hora} está fora do funcionamento do complexo."]);
+                return back()->withErrors(['horario' => "O horário {$hora} está fora do funcionamento da arena."]);
             }
         }
 
@@ -81,10 +81,10 @@ class ReservaController extends Controller
 
         // 2. Loop para validar conflitos e CALCULAR O PREÇO NO SERVIDOR
         foreach ($horariosSelecionados as $hora) {
-            
+
 $turno = $this->detectarTurno($hora);
 
-            $regraPreco = ArenaPrecoTurno::where('arena_id', $request->arena_id)
+            $regraPreco = QuadraPrecoTurno::where('quadra_id', $request->quadra_id)
                 ->where('esporte', $request->esporte)
                 ->where('turno', $turno)
                 ->first();
@@ -96,10 +96,10 @@ $turno = $this->detectarTurno($hora);
             $totalCalculado += $regraPreco->valor_hora;
 
             // Verifica conflito de reserva existente
-            $conflito = Reserva::where('arena_id', $request->arena_id)
+            $conflito = Reserva::where('quadra_id', $request->quadra_id)
                 ->where('data_reserva', $request->data_reserva)
                 ->where('horario', 'LIKE', '%' . $hora . '%') // Verifica se o horário já está ocupado
-                ->where('status', '!=', 'cancelado') 
+                ->where('status', '!=', 'cancelado')
                 ->exists();
 
             if ($conflito) {
@@ -114,7 +114,8 @@ $turno = $this->detectarTurno($hora);
         $reserva = Reserva::create([
             'user_id' => $usuarioReserva,
             'reservado_para' => $reservadoPara,
-            'arena_id' => $request->arena_id,
+            'quadra_id' => $request->quadra_id,
+            'esporte' => $request->esporte,
             'data_reserva' => $request->data_reserva,
             'horario' => implode(' | ', $horariosSelecionados),
             'valor_total' => $totalCalculado, // Valor real calculado no servidor
@@ -124,7 +125,7 @@ $turno = $this->detectarTurno($hora);
         ]);
 
         return redirect('/agendamento/pagamento?' . http_build_query([
-            'arena_id' => $request->arena_id,
+            'quadra_id' => $request->quadra_id,
             'data' => $request->data_reserva,
             'horario' => implode(' | ', $horariosSelecionados),
             'esporte' => $request->esporte,

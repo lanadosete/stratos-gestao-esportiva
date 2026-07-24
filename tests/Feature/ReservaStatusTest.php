@@ -3,10 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Arena;
-use App\Models\ArenaEsporte;
-use App\Models\ArenaPrecoTurno;
-use App\Models\Complexo;
-use App\Models\ComplexoFuncionamento;
+use App\Models\ArenaFuncionamento;
+use App\Models\Quadra;
+use App\Models\QuadraEsporte;
+use App\Models\QuadraPrecoTurno;
 use App\Models\Reserva;
 use App\Models\User;
 use Carbon\Carbon;
@@ -26,16 +26,16 @@ class ReservaStatusTest extends TestCase
             'tipo_conta' => 'admin',
         ]);
 
-        $complexo = Complexo::create([
+        $arena = Arena::create([
             'user_id' => $admin->id,
-            'nome' => 'Complexo Teste',
+            'nome' => 'Arena Teste',
             'endereco' => 'Rua Teste',
             'telefone' => '11999999999',
         ]);
 
-        $arena = Arena::create([
-            'complexo_id' => $complexo->id,
-            'nome' => 'Arena 1',
+        $quadra = Quadra::create([
+            'arena_id' => $arena->id,
+            'nome' => 'Quadra 1',
             'tipo_esporte' => 'Multiuso',
         ]);
 
@@ -48,7 +48,7 @@ class ReservaStatusTest extends TestCase
 
         return Reserva::create(array_merge([
             'user_id' => $cliente->id,
-            'arena_id' => $arena->id,
+            'quadra_id' => $quadra->id,
             'data_reserva' => Carbon::today()->toDateString(),
             'horario' => '18:00',
             'valor_total' => 100,
@@ -60,6 +60,8 @@ class ReservaStatusTest extends TestCase
 
     public function test_reserva_via_pix_nasce_marcada_como_paga_e_local_nao(): void
     {
+        Carbon::setTestNow(Carbon::today()->setTime(10, 0));
+
         $admin = User::create([
             'name' => 'Admin Teste',
             'email' => 'admin' . uniqid() . '@test.com',
@@ -67,29 +69,29 @@ class ReservaStatusTest extends TestCase
             'tipo_conta' => 'admin',
         ]);
 
-        $complexo = Complexo::create([
+        $arena = Arena::create([
             'user_id' => $admin->id,
-            'nome' => 'Complexo Teste',
+            'nome' => 'Arena Teste',
             'endereco' => 'Rua Teste',
             'telefone' => '11999999999',
         ]);
 
-        $arena = Arena::create([
-            'complexo_id' => $complexo->id,
-            'nome' => 'Arena 1',
+        $quadra = Quadra::create([
+            'arena_id' => $arena->id,
+            'nome' => 'Quadra 1',
             'tipo_esporte' => 'Multiuso',
         ]);
 
-        ComplexoFuncionamento::create([
-            'complexo_id' => $complexo->id,
+        ArenaFuncionamento::create([
+            'arena_id' => $arena->id,
             'dia_semana' => Carbon::today()->dayOfWeek,
             'hora_abertura' => '08:00:00',
             'hora_fechamento' => '23:00:00',
             'ativo' => true,
         ]);
 
-        ArenaEsporte::create(['arena_id' => $arena->id, 'nome' => 'Futevôlei', 'ativo' => true]);
-        ArenaPrecoTurno::create(['arena_id' => $arena->id, 'esporte' => 'Futevôlei', 'turno' => 'Noite', 'valor_hora' => 100]);
+        QuadraEsporte::create(['quadra_id' => $quadra->id, 'nome' => 'Futevôlei', 'ativo' => true]);
+        QuadraPrecoTurno::create(['quadra_id' => $quadra->id, 'esporte' => 'Futevôlei', 'turno' => 'Noite', 'valor_hora' => 100]);
 
         $cliente = User::create([
             'name' => 'Cliente Teste',
@@ -99,26 +101,28 @@ class ReservaStatusTest extends TestCase
         ]);
 
         $this->actingAs($cliente)->post('/agendamento/finalizar', [
-            'arena_id' => $arena->id,
+            'quadra_id' => $quadra->id,
             'data_reserva' => Carbon::today()->toDateString(),
             'horarios' => ['20:00'],
             'esporte' => 'Futevôlei',
             'metodo_pagamento' => 'pix',
         ]);
 
-        $reservaPix = Reserva::where('arena_id', $arena->id)->where('horario', '20:00')->firstOrFail();
+        $reservaPix = Reserva::where('quadra_id', $quadra->id)->where('horario', '20:00')->firstOrFail();
         $this->assertTrue($reservaPix->pago);
 
         $this->actingAs($cliente)->post('/agendamento/finalizar', [
-            'arena_id' => $arena->id,
+            'quadra_id' => $quadra->id,
             'data_reserva' => Carbon::today()->toDateString(),
             'horarios' => ['21:00'],
             'esporte' => 'Futevôlei',
             'metodo_pagamento' => 'local',
         ]);
 
-        $reservaLocal = Reserva::where('arena_id', $arena->id)->where('horario', '21:00')->firstOrFail();
+        $reservaLocal = Reserva::where('quadra_id', $quadra->id)->where('horario', '21:00')->firstOrFail();
         $this->assertFalse($reservaLocal->pago);
+
+        Carbon::setTestNow();
     }
 
     public function test_status_calculado_a_iniciar_para_horario_futuro(): void

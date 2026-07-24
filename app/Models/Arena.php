@@ -5,20 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Complexo extends Model
+class Arena extends Model
 {
     use HasFactory;
 
     protected $fillable = ['user_id', 'nome', 'endereco', 'telefone'];
 
-    // Um Complexo tem muitas Arenas (quadras)
-    public function arenas()
+    // Uma Arena tem muitas Quadras
+    public function quadras()
     {
-        return $this->hasMany(Arena::class);
+        return $this->hasMany(Quadra::class);
     }
 
     public function funcionamento()
     {
-        return $this->hasMany(ComplexoFuncionamento::class);
+        return $this->hasMany(ArenaFuncionamento::class);
+    }
+
+    // Uma Arena possui muitos usuários vinculados (admins e funcionários)
+    public function usuarios()
+    {
+        return $this->hasMany(User::class);
     }
 }

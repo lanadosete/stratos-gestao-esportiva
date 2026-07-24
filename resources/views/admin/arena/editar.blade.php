@@ -7,18 +7,18 @@
             <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle mb-3" style="width: 70px; height: 70px;">
                 <i class="bi bi-building fs-1"></i>
             </div>
-            <h3 class="text-dark fw-bold mb-1">Editar Complexo</h3>
+            <h3 class="text-dark fw-bold mb-1">Editar Arena</h3>
             <p class="text-muted">Atualize os dados do seu espaço esportivo.</p>
         </div>
 
-        <form action="/admin/complexo/{{ $complexo->id }}/atualizar" method="POST" novalidate>
+        <form action="/admin/arena/{{ $arena->id }}/atualizar" method="POST" novalidate>
             @csrf
 
             <div class="mb-3">
-                <label class="form-label small fw-bold text-muted text-uppercase">Nome do Complexo / Estabelecimento</label>
+                <label class="form-label small fw-bold text-muted text-uppercase">Nome da Arena / Estabelecimento</label>
                 <div class="input-group input-group-lg shadow-sm rounded-3">
                     <span class="input-group-text border-0 bg-light"><i class="bi bi-fonts text-muted"></i></span>
-                    <input type="text" name="nome" class="form-control border-0 bg-light" value="{{ old('nome', $complexo->nome) }}">
+                    <input type="text" name="nome" class="form-control border-0 bg-light" value="{{ old('nome', $arena->nome) }}">
                 </div>
                 @error('nome')
                     <div class="text-danger small mt-2"><i class="bi bi-exclamation-circle me-1"></i>{{ $message }}</div>
@@ -29,7 +29,7 @@
                 <label class="form-label small fw-bold text-muted text-uppercase">Endereço Completo</label>
                 <div class="input-group input-group-lg shadow-sm rounded-3">
                     <span class="input-group-text border-0 bg-light"><i class="bi bi-geo-alt text-muted"></i></span>
-                    <input type="text" name="endereco" class="form-control border-0 bg-light" value="{{ old('endereco', $complexo->endereco) }}">
+                    <input type="text" name="endereco" class="form-control border-0 bg-light" value="{{ old('endereco', $arena->endereco) }}">
                 </div>
                 @error('endereco')
                     <div class="text-danger small mt-2"><i class="bi bi-exclamation-circle me-1"></i>{{ $message }}</div>
@@ -40,7 +40,7 @@
                 <label class="form-label small fw-bold text-muted text-uppercase">Telefone / WhatsApp</label>
                 <div class="input-group input-group-lg shadow-sm rounded-3">
                     <span class="input-group-text border-0 bg-light"><i class="bi bi-telephone text-muted"></i></span>
-                    <input type="text" name="telefone" class="form-control border-0 bg-light" value="{{ old('telefone', $complexo->telefone) }}">
+                    <input type="text" name="telefone" class="form-control border-0 bg-light" value="{{ old('telefone', $arena->telefone) }}">
                 </div>
                 @error('telefone')
                     <div class="text-danger small mt-2"><i class="bi bi-exclamation-circle me-1"></i>{{ $message }}</div>
@@ -49,9 +49,9 @@
 
             <div class="card bg-light border-0 rounded-3 p-3 mb-4">
                 <h6 class="fw-bold text-dark mb-2">Dias de funcionamento geral</h6>
-                <p class="text-muted small mb-3">Marque os dias em que o complexo opera. Os horários definidos abaixo valerão para todos os dias selecionados.</p>
+                <p class="text-muted small mb-3">Marque os dias em que a arena opera. Os horários definidos abaixo valerão para todos os dias selecionados.</p>
                 @php
-                    $funcionamentos = $complexo->funcionamento()->where('ativo', true)->get();
+                    $funcionamentos = $arena->funcionamento()->where('ativo', true)->get();
                     $diasMarcados = $funcionamentos->pluck('dia_semana')->map(fn($item) => (string) $item)->toArray();
                     $horaAberturaAtual = old('hora_abertura', optional($funcionamentos->first())->hora_abertura);
                     $horaFechamentoAtual = old('hora_fechamento', optional($funcionamentos->first())->hora_fechamento);
