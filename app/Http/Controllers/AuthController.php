@@ -21,24 +21,19 @@ class AuthController extends Controller
         ]);
 
         // 2. Cria o usuário no banco de dados com a senha segura
+        // Este formulário é exclusivo para clientes (jogadores) — proprietários se
+        // cadastram pelo wizard dedicado em /cadastro/administrativo.
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'telefone' => $request->telefone,
             'password' => Hash::make($request->password),
-            // Se o botão foi marcado, vira admin. Se não, vira cliente.
-            'tipo_conta' => $request->has('is_admin') ? 'admin' : 'cliente',
+            'tipo_conta' => 'cliente',
         ]);
 
         // 3. Faz o login automático
         Auth::login($user);
 
-        // 4. Direciona para o painel correto
-        // Agora ele vai para o dashboard, que fará a verificação se a arena já existe
-        if ($user->tipo_conta === 'admin') {
-            return redirect('/admin/dashboard'); 
-        }
-        
         return redirect('/');
     }
 

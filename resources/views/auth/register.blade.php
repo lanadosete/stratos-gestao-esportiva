@@ -55,27 +55,13 @@
                 </div>
             </div>
 
-            <!-- Seleção de Tipo de Conta -->
-            <div class="mb-4">
-                <div class="card bg-light border-0 shadow-sm rounded-3">
-                    <div class="card-body py-3 px-4 d-flex align-items-center">
-                        <div class="form-check form-switch fs-5 mb-0 me-3">
-                            <input class="form-check-input" type="checkbox" name="is_admin" value="1" id="tipoConta">
-                        </div>
-                        <label class="form-check-label" for="tipoConta" style="cursor: pointer;">
-                            <span class="fw-bold text-dark d-block" style="font-size: 0.95rem;">Sou proprietário de um espaço</span>
-                            <span class="text-muted small d-block" style="font-size: 0.8rem;">Marque para gerenciar quadras e reservas.</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
             <button type="submit" class="btn btn-verde w-100 py-3 fw-bold rounded-pill shadow-sm">
                 Criar Conta <i class="bi bi-arrow-right ms-2"></i>
             </button>
-            
+
             <div class="text-center mt-4">
-                <p class="text-muted small">Já tem uma conta? <a href="/login" class="text-success fw-bold text-decoration-none">Faça login</a></p>
+                <p class="text-muted small mb-1">Já tem uma conta? <a href="/login" class="text-success fw-bold text-decoration-none">Faça login</a></p>
+                <p class="text-muted small mb-0">É proprietário de uma arena? <a href="/cadastro/administrativo" class="text-success fw-bold text-decoration-none">Cadastre-se aqui</a></p>
             </div>
         </form>
 
